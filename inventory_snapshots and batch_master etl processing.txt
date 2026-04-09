@@ -202,38 +202,38 @@ hive>
     > SELECT
     >     batch_id,
     >     product_sku,
-    >
-    >     -- ✅ Convert dates
     >     CAST(manufacture_date AS TIMESTAMP) AS manufacture_date,
     >     CAST(expiry_date AS TIMESTAMP) AS expiry_date,
-    >
-    >     -- ✅ Quantity
     >     CAST(batch_qty AS INT) AS batch_qty,
-    >
-    >     -- ✅ Temperature cleaning
     >     CAST(NULLIF(TRIM(min_temp_c), '') AS DOUBLE) AS min_temp_c,
     >     CAST(NULLIF(TRIM(max_temp_c), '') AS DOUBLE) AS max_temp_c,
     >
-    >     -- ✅ Normalize status
     >     CASE
     >         WHEN UPPER(TRIM(batch_status)) IN ('RELEASED', 'QUARANTINE', 'RECALLED', 'EXPIRED')
     >         THEN UPPER(TRIM(batch_status))
     >         ELSE NULL
-    >     END AS batch_status
+    >     END AS batch_status,
+    >
+    >     -- 🔥 NEW COLUMN
+    >     DATEDIFF(
+    >         CAST(expiry_date AS DATE),
+    >         CAST(manufacture_date AS DATE)
+    >     ) AS shelf_life_days
     >
     > FROM batch_master_raw;
-Query ID = hadoop_20260409113256_4edacd6a-5be4-40d3-8f60-c5085ed16ec5
+Query ID = hadoop_20260409115300_fe87bb21-1662-4db3-9e03-31e5c8393b06
 Total jobs = 1
 Launching Job 1 out of 1
-Status: Running (Executing on YARN cluster with App id application_1775709409707_0018)
+Status: Running (Executing on YARN cluster with App id application_1775709409707_0020)
 
 Map 1: -/-
 Map 1: 0/1
 Map 1: 0(+1)/1
 Map 1: 1/1
-Moving data to directory hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hive/warehouse/batch_master_clean
+Moving data to directory hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hive/warehouse/pharma_db_kritika.db/batch_master_clean
 OK
-Time taken: 6.919 seconds
+Time taken: 4.601 seconds
+hive>
 hive> DROP TABLE IF EXISTS batch_master_valid;
 OK
 Time taken: 0.009 seconds
@@ -268,29 +268,33 @@ Time taken: 0.014 seconds
 hive>
     > CREATE TABLE batch_master_invalid AS
     > SELECT *,
-    >     CASE
-    >         WHEN expiry_date < manufacture_date THEN 'Invalid expiry date'
-    >         WHEN batch_qty <= 0 THEN 'Invalid batch quantity'
-    >         WHEN min_temp_c > max_temp_c THEN 'Temperature mismatch'
-    >         WHEN batch_status IS NULL THEN 'Invalid batch status'
-    >         ELSE 'Unknown issue'
-    >     END AS invalid_reason
+    >     CONCAT_WS('; ',
+    >         CASE WHEN expiry_date < manufacture_date THEN 'Invalid expiry date' END,
+    >         CASE WHEN batch_qty <= 0 THEN 'Invalid batch quantity' END,
+    >         CASE WHEN min_temp_c > max_temp_c THEN 'Temperature mismatch' END,
+    >         CASE WHEN batch_status IS NULL THEN 'Invalid batch status' END
+    >     ) AS invalid_reason
     > FROM batch_master_clean
     > WHERE
     >     expiry_date < manufacture_date
     >     OR batch_qty <= 0
     >     OR min_temp_c > max_temp_c
     >     OR batch_status IS NULL;
-Query ID = hadoop_20260409113351_7b1750d0-35e4-449d-ab57-576d8f9e0fa1
+Query ID = hadoop_20260409115053_23959a5a-e27d-4cf9-a44b-a0c691f6a33a
 Total jobs = 1
 Launching Job 1 out of 1
-Status: Running (Executing on YARN cluster with App id application_1775709409707_0018)
+Tez session was closed. Reopening...
+Session re-established.
+Session re-established.
+Status: Running (Executing on YARN cluster with App id application_1775709409707_0020)
 
 Map 1: -/-
+Map 1: 0/1
+Map 1: 0(+1)/1
 Map 1: 1/1
-Moving data to directory hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hive/warehouse/batch_master_invalid
+Moving data to directory hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hive/warehouse/pharma_db_kritika.db/batch_master_invalid
 OK
-Time taken: 0.7 seconds
+Time taken: 10.246 seconds
 hive> -- Total
 hive> SELECT COUNT(*) FROM batch_master_clean;
 OK
@@ -324,6 +328,84 @@ B039    SKU025  2026-03-29 17:32:56.938149      2026-12-07 17:32:56.938149      
 B057    SKU025  2026-03-09 17:32:56.954046      2026-12-29 17:32:56.954046      670     10.0    5.0     RELEASED        Temperature mismatch
 Time taken: 0.054 seconds, Fetched: 12 row(s)
 hive>
-
+hive> select * from batch_master_clean;
+OK
+B000    SKU005  2026-03-31 17:32:56.901387      2026-12-22 17:32:56.901387      177     NULL    NULL    QUARANTINE      266
+B001    SKU025  2026-03-12 17:32:56.902402      2026-03-07 17:32:56.902402      195     10.0    5.0     RELEASED        -5
+B002    SKU005  2026-03-26 17:32:56.903272      2026-12-29 17:32:56.903272      985     NULL    NULL    QUARANTINE      278
+B003    SKU028  2026-04-07 17:32:56.904069      2026-07-30 17:32:56.904069      499     NULL    NULL    QUARANTINE      114
+B004    SKU029  2026-03-14 17:32:56.904904      2026-12-01 17:32:56.904904      813     NULL    NULL    RECALLED        262
+B005    SKU025  2026-03-22 17:32:56.905737      2026-12-26 17:32:56.905737      403     10.0    5.0     RELEASED        279
+B006    SKU001  2026-03-21 17:32:56.906554      2027-01-22 17:32:56.906554      158     10.0    5.0     RELEASED        307
+B007    SKU018  2026-03-24 17:32:56.907385      2027-01-05 17:32:56.907385      643     NULL    NULL    RELEASED        287
+B008    SKU001  2026-03-09 17:32:56.908157      2026-03-04 17:32:56.908157      170     NULL    NULL    RECALLED        -5
+B009    SKU002  2026-03-18 17:32:56.909724      2026-08-15 17:32:56.909724      683     10.0    5.0     RELEASED        150
+B010    SKU018  2026-03-20 17:32:56.911393      2026-05-09 17:32:56.911393      529     NULL    NULL    RECALLED        50
+B011    SKU018  2026-03-21 17:32:56.912651      2027-01-12 17:32:56.912651      367     NULL    NULL    RELEASED        297
+B012    SKU021  2026-03-17 17:32:56.913522      2026-09-23 17:32:56.913522      505     2.0     8.0     RELEASED        190
+B013    SKU021  2026-03-19 17:32:56.914348      2026-09-18 17:32:56.914348      869     2.0     8.0     RELEASED        183
+B014    SKU000  2026-03-25 17:32:56.915182      2027-03-08 17:32:56.915182      202     NULL    NULL    RELEASED        348
+B015    SKU017  2026-04-02 17:32:56.915994      2027-01-16 17:32:56.915994      457     NULL    NULL    RELEASED        289
+B016    SKU028  2026-04-01 17:32:56.916764      2026-11-06 17:32:56.916764      548     NULL    NULL    RECALLED        219
+B017    SKU022  2026-03-30 17:32:56.917586      2027-03-08 17:32:56.917586      926     NULL    NULL    RECALLED        343
+B018    SKU016  2026-04-08 17:32:56.918405      2027-02-15 17:32:56.918405      779     NULL    NULL    RELEASED        313
+B019    SKU028  2026-04-04 17:32:56.919271      2026-03-30 17:32:56.919271      860     NULL    NULL    RECALLED        -5
+B020    SKU004  2026-03-31 17:32:56.920103      2026-09-21 17:32:56.920103      834     NULL    NULL    QUARANTINE      174
+B021    SKU006  2026-03-18 17:32:56.920911      2027-03-07 17:32:56.920911      617     NULL    NULL    QUARANTINE      354
+B022    SKU008  2026-03-11 17:32:56.921708      2026-05-06 17:32:56.921708      949     10.0    5.0     QUARANTINE      56
+B023    SKU001  2026-04-08 17:32:56.922546      2026-10-25 17:32:56.922546      752     NULL    NULL    QUARANTINE      200
+B024    SKU005  2026-03-16 17:32:56.923371      2026-11-27 17:32:56.923371      537     NULL    NULL    RECALLED        256
+B025    SKU000  2026-04-05 17:32:56.924227      2026-06-12 17:32:56.924227      807     NULL    NULL    RELEASED        68
+B026    SKU017  2026-04-07 17:32:56.925769      2026-11-12 17:32:56.925769      251     NULL    NULL    QUARANTINE      219
+B027    SKU004  2026-04-07 17:32:56.926764      2026-10-11 17:32:56.926764      915     NULL    NULL    RELEASED        187
+B028    SKU028  2026-03-28 17:32:56.928251      2026-08-12 17:32:56.928251      782     NULL    NULL    RELEASED        137
+B029    SKU011  2026-03-15 17:32:56.929466      2027-01-25 17:32:56.929466      516     NULL    NULL    RECALLED        316
+B030    SKU023  2026-04-04 17:32:56.930372      2026-09-02 17:32:56.930372      919     2.0     8.0     RELEASED        151
+B031    SKU028  2026-03-26 17:32:56.931205      2026-05-07 17:32:56.931205      440     NULL    NULL    QUARANTINE      42
+B032    SKU025  2026-03-18 17:32:56.932019      2026-08-22 17:32:56.932019      906     10.0    5.0     RECALLED        157
+B033    SKU003  2026-03-27 17:32:56.93279       2026-05-15 17:32:56.93279       327     10.0    5.0     RELEASED        49
+B034    SKU026  2026-03-10 17:32:56.933627      2026-11-30 17:32:56.933627      940     NULL    NULL    RELEASED        265
+B035    SKU007  2026-04-08 17:32:56.934445      2026-08-14 17:32:56.934445      385     2.0     8.0     RELEASED        128
+B036    SKU024  2026-03-31 17:32:56.935576      2026-10-26 17:32:56.935576      509     2.0     8.0     RECALLED        209
+B037    SKU026  2026-03-22 17:32:56.936488      2026-10-07 17:32:56.936488      218     NULL    NULL    QUARANTINE      199
+B038    SKU005  2026-03-21 17:32:56.937325      2026-09-02 17:32:56.937325      453     10.0    5.0     RECALLED        165
+B039    SKU025  2026-03-29 17:32:56.938149      2026-12-07 17:32:56.938149      623     10.0    5.0     RELEASED        253
+B040    SKU012  2026-03-11 17:32:56.938956      2027-01-30 17:32:56.938956      145     NULL    NULL    RECALLED        325
+B041    SKU013  2026-04-08 17:32:56.939743      2027-01-29 17:32:56.939743      651     2.0     8.0     RECALLED        296
+B042    SKU023  2026-03-09 17:32:56.940705      2026-07-17 17:32:56.940705      171     2.0     8.0     RECALLED        130
+B043    SKU029  2026-03-29 17:32:56.941537      2027-03-13 17:32:56.941537      968     NULL    NULL    RELEASED        349
+B044    SKU023  2026-03-11 17:32:56.942349      2026-09-10 17:32:56.942349      782     2.0     8.0     QUARANTINE      183
+B045    SKU010  2026-03-27 17:32:56.943164      2026-09-24 17:32:56.943164      296     NULL    NULL    QUARANTINE      181
+B046    SKU021  2026-03-09 17:32:56.944377      2026-10-19 17:32:56.944377      278     2.0     8.0     RECALLED        224
+B047    SKU018  2026-03-30 17:32:56.945625      2026-11-22 17:32:56.945625      100     NULL    NULL    QUARANTINE      237
+B048    SKU009  2026-04-02 17:32:56.946662      2026-12-08 17:32:56.946662      721     2.0     8.0     RECALLED        250
+B049    SKU010  2026-03-25 17:32:56.947532      2026-12-06 17:32:56.947532      318     NULL    NULL    RECALLED        256
+B050    SKU015  2026-03-14 17:32:56.948346      2026-07-08 17:32:56.948346      390     NULL    NULL    RECALLED        116
+B051    SKU021  2026-03-19 17:32:56.949151      2027-03-01 17:32:56.949151      938     2.0     8.0     RELEASED        347
+B052    SKU021  2026-03-30 17:32:56.94997       2026-08-22 17:32:56.94997       250     2.0     8.0     RELEASED        145
+B053    SKU001  2026-04-01 17:32:56.950754      2026-12-30 17:32:56.950754      886     NULL    NULL    RELEASED        273
+B054    SKU014  2026-03-26 17:32:56.951579      2027-03-13 17:32:56.951579      835     NULL    NULL    RECALLED        352
+B055    SKU012  2026-03-24 17:32:56.952392      2026-11-13 17:32:56.952392      771     NULL    NULL    RECALLED        234
+B056    SKU000  2026-03-11 17:32:56.953214      2026-06-03 17:32:56.953214      324     NULL    NULL    RELEASED        84
+B057    SKU025  2026-03-09 17:32:56.954046      2026-12-29 17:32:56.954046      670     10.0    5.0     RELEASED        295
+B058    SKU029  2026-03-12 17:32:56.95487       2026-06-12 17:32:56.95487       920     NULL    NULL    QUARANTINE      92
+B059    SKU021  2026-03-23 17:32:56.955704      2027-02-02 17:32:56.955704      873     2.0     8.0     QUARANTINE      316
+Time taken: 0.05 seconds, Fetched: 60 row(s)
+hive> select * from batch_master_invalid;
+OK
+B001    SKU025  2026-03-12 17:32:56.902402      2026-03-07 17:32:56.902402      195     10.0    5.0     RELEASED        Invalid expiry date; Temperature mismatch
+B005    SKU025  2026-03-22 17:32:56.905737      2026-12-26 17:32:56.905737      403     10.0    5.0     RELEASED        Temperature mismatch
+B006    SKU001  2026-03-21 17:32:56.906554      2027-01-22 17:32:56.906554      158     10.0    5.0     RELEASED        Temperature mismatch
+B008    SKU001  2026-03-09 17:32:56.908157      2026-03-04 17:32:56.908157      170     NULL    NULL    RECALLED        Invalid expiry date
+B009    SKU002  2026-03-18 17:32:56.909724      2026-08-15 17:32:56.909724      683     10.0    5.0     RELEASED        Temperature mismatch
+B019    SKU028  2026-04-04 17:32:56.919271      2026-03-30 17:32:56.919271      860     NULL    NULL    RECALLED        Invalid expiry date
+B022    SKU008  2026-03-11 17:32:56.921708      2026-05-06 17:32:56.921708      949     10.0    5.0     QUARANTINE      Temperature mismatch
+B032    SKU025  2026-03-18 17:32:56.932019      2026-08-22 17:32:56.932019      906     10.0    5.0     RECALLED        Temperature mismatch
+B033    SKU003  2026-03-27 17:32:56.93279       2026-05-15 17:32:56.93279       327     10.0    5.0     RELEASED        Temperature mismatch
+B038    SKU005  2026-03-21 17:32:56.937325      2026-09-02 17:32:56.937325      453     10.0    5.0     RECALLED        Temperature mismatch
+B039    SKU025  2026-03-29 17:32:56.938149      2026-12-07 17:32:56.938149      623     10.0    5.0     RELEASED        Temperature mismatch
+B057    SKU025  2026-03-09 17:32:56.954046      2026-12-29 17:32:56.954046      670     10.0    5.0     RELEASED        Temperature mismatch
+Time taken: 0.062 seconds, Fetched: 12 row(s)
+hive>
 
 
