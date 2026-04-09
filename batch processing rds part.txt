@@ -185,3 +185,95 @@ MySQL [pharma_kritika]> SELECT product_sku, COUNT(*)
 Empty set (0.018 sec)
 
 MySQL [pharma_kritika]>
+
+
+[hadoop@ip-172-31-20-201 ~]$ sqoop import \
+> --connect jdbc:mysql://retailpulse-kritika-db.c58qessmggt4.ap-south-1.rds.amazonaws.com:3306/pharma_kritika \
+> --username admin \
+> --password Admin1234 \
+> --driver com.mysql.cj.jdbc.Driver \
+> --table product_master \
+> --target-dir /user/hadoop/product_master \
+> --as-textfile \
+> --fields-terminated-by ',' \
+> --lines-terminated-by '\n' \
+> --m 1
+Warning: /usr/lib/sqoop/../accumulo does not exist! Accumulo imports will fail.
+Please set $ACCUMULO_HOME to the root of your Accumulo installation.
+SLF4J: Class path contains multiple SLF4J bindings.
+SLF4J: Found binding in [jar:file:/usr/lib/hadoop/lib/slf4j-reload4j-1.7.36.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/usr/lib/hive/lib/log4j-slf4j-impl-2.17.1.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: Found binding in [jar:file:/usr/lib/hbase/lib/client-facing-thirdparty/slf4j-reload4j-1.7.33.jar!/org/slf4j/impl/StaticLoggerBinder.class]
+SLF4J: See http://www.slf4j.org/codes.html#multiple_bindings for an explanation.
+SLF4J: Actual binding is of type [org.slf4j.impl.Reload4jLoggerFactory]
+2026-04-09 06:11:44,924 INFO sqoop.Sqoop: Running Sqoop version: 1.4.7
+2026-04-09 06:11:44,954 WARN tool.BaseSqoopTool: Setting your password on the command-line is insecure. Consider using -P instead.
+2026-04-09 06:11:45,032 WARN sqoop.ConnFactory: Parameter --driver is set to an explicit driver however appropriate connection manager is not being set (via --connection-manager). Sqoop is going to fall back to org.apache.sqoop.manager.GenericJdbcManager. Please specify explicitly which connection manager should be used next time.
+2026-04-09 06:11:45,043 INFO manager.SqlManager: Using default fetchSize of 1000
+2026-04-09 06:11:45,043 INFO tool.CodeGenTool: Beginning code generation
+2026-04-09 06:11:45,489 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM product_master AS t WHERE 1=0
+2026-04-09 06:11:45,496 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM product_master AS t WHERE 1=0
+2026-04-09 06:11:45,540 INFO orm.CompilationManager: HADOOP_MAPRED_HOME is /usr/lib/hadoop-mapreduce
+2026-04-09 06:11:48,116 INFO orm.CompilationManager: Writing jar file: /tmp/sqoop-hadoop/compile/41d7f49598a7160c497d75c35cd1439c/product_master.jar
+2026-04-09 06:11:48,153 INFO mapreduce.ImportJobBase: Beginning import of product_master
+2026-04-09 06:11:48,270 INFO Configuration.deprecation: mapred.jar is deprecated. Instead, use mapreduce.job.jar
+2026-04-09 06:11:48,274 INFO manager.SqlManager: Executing SQL statement: SELECT t.* FROM product_master AS t WHERE 1=0
+2026-04-09 06:11:48,872 INFO Configuration.deprecation: mapred.map.tasks is deprecated. Instead, use mapreduce.job.maps
+2026-04-09 06:11:49,330 INFO client.DefaultNoHARMFailoverProxyProvider: Connecting to ResourceManager at ip-172-31-20-201.ap-south-1.compute.internal/172.31.20.201:8032
+2026-04-09 06:11:49,506 INFO client.AHSProxy: Connecting to Application History server at ip-172-31-20-201.ap-south-1.compute.internal/172.31.20.201:10200
+2026-04-09 06:11:49,714 INFO mapreduce.JobResourceUploader: Disabling Erasure Coding for path: /tmp/hadoop-yarn/staging/hadoop/.staging/job_1775709409707_0002
+2026-04-09 06:11:52,333 INFO db.DBInputFormat: Using read commited transaction isolation
+2026-04-09 06:11:52,379 INFO mapreduce.JobSubmitter: number of splits:1
+2026-04-09 06:11:52,646 INFO mapreduce.JobSubmitter: Submitting tokens for job: job_1775709409707_0002
+2026-04-09 06:11:52,646 INFO mapreduce.JobSubmitter: Executing with tokens: []
+2026-04-09 06:11:52,827 INFO conf.Configuration: resource-types.xml not found
+2026-04-09 06:11:52,828 INFO resource.ResourceUtils: Unable to find 'resource-types.xml'.
+2026-04-09 06:11:52,896 INFO impl.YarnClientImpl: Submitted application application_1775709409707_0002
+2026-04-09 06:11:52,935 INFO mapreduce.Job: The url to track the job: http://ip-172-31-20-201.ap-south-1.compute.internal:20888/proxy/application_1775709409707_0002/
+2026-04-09 06:11:52,936 INFO mapreduce.Job: Running job: job_1775709409707_0002
+2026-04-09 06:11:59,019 INFO mapreduce.Job: Job job_1775709409707_0002 running in uber mode : false
+2026-04-09 06:11:59,020 INFO mapreduce.Job:  map 0% reduce 0%
+2026-04-09 06:12:06,148 INFO mapreduce.Job:  map 100% reduce 0%
+2026-04-09 06:12:07,158 INFO mapreduce.Job: Job job_1775709409707_0002 completed successfully
+2026-04-09 06:12:07,261 INFO mapreduce.Job: Counters: 33
+        File System Counters
+                FILE: Number of bytes read=0
+                FILE: Number of bytes written=299885
+                FILE: Number of read operations=0
+                FILE: Number of large read operations=0
+                FILE: Number of write operations=0
+                HDFS: Number of bytes read=85
+                HDFS: Number of bytes written=3145
+                HDFS: Number of read operations=6
+                HDFS: Number of large read operations=0
+                HDFS: Number of write operations=2
+                HDFS: Number of bytes read erasure-coded=0
+        Job Counters
+                Launched map tasks=1
+                Other local map tasks=1
+                Total time spent by all maps in occupied slots (ms)=12280032
+                Total time spent by all reduces in occupied slots (ms)=0
+                Total time spent by all map tasks (ms)=4194
+                Total vcore-milliseconds taken by all map tasks=4194
+                Total megabyte-milliseconds taken by all map tasks=12280032
+        Map-Reduce Framework
+                Map input records=30
+                Map output records=30
+                Input split bytes=85
+                Spilled Records=0
+                Failed Shuffles=0
+                Merged Map outputs=0
+                GC time elapsed (ms)=126
+                CPU time spent (ms)=1360
+                Physical memory (bytes) snapshot=393568256
+                Virtual memory (bytes) snapshot=4189351936
+                Total committed heap usage (bytes)=434110464
+                Peak Map Physical memory (bytes)=393568256
+                Peak Map Virtual memory (bytes)=4189351936
+        File Input Format Counters
+                Bytes Read=0
+        File Output Format Counters
+                Bytes Written=3145
+2026-04-09 06:12:07,266 INFO mapreduce.ImportJobBase: Transferred 3.0713 KB in 18.3835 seconds (171.0773 bytes/sec)
+2026-04-09 06:12:07,269 INFO mapreduce.ImportJobBase: Retrieved 30 records.
+[hadoop@ip-172-31-20-201 ~]$
