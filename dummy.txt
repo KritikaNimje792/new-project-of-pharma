@@ -1,37 +1,153 @@
-this file is inventory_events:
-event_id,event_time,distributor_id,product_sku,batch_id,change_type,quantity_delta,current_stock
-IE000,2026-03-21 17:32:57.019559,D02,SKU021,B028,INVALID,95,358
-IE001,2026-04-03 17:32:57.019593,D08,SKU027,B002,RECEIPT,34,331
-IE002,2026-03-13 17:32:57.019600,D07,SKU024,B026,RECEIPT,19,372
-IE003,2026-04-02 17:32:57.019605,D09,SKU023,B053,RECEIPT,85,333
-IE004,2026-04-07 17:32:57.019610,D02,SKU014,B025,RECEIPT,83,467
-IE005,2026-03-22 17:32:57.019615,D03,SKU012,B043,DISPATCH,-61,379
-IE006,2026-04-08 17:32:57.019620,D04,SKU029,B051,INVALID,-34,439
-IE007,2026-03-09 17:32:57.019625,D00,SKU003,B058,DISPATCH,-87,342
-IE008,2026-03-29 17:32:57.019629,D04,SKU008,B051,DISPATCH,-79,80
-IE009,2026-03-18 17:32:57.019634,D03,SKU023,B043,DISPATCH,-84,179
-IE010,2026-03-29 17:32:57.019639,D08,SKU000,B043,RETURN,44,-12
-IE011,2026-03-18 17:32:57.019643,D07,SKU011,B014,RECEIPT,2,270
+[hadoop@ip-172-31-20-201 ~]$ spark-submit kinesis_consumer.py
+26/04/09 12:42:36 INFO SparkContext: Running Spark version 3.4.1-amzn-2
+26/04/09 12:42:36 INFO ResourceUtils: ==============================================================
+26/04/09 12:42:36 INFO ResourceUtils: No custom resources configured for spark.driver.
+26/04/09 12:42:36 INFO ResourceUtils: ==============================================================
+26/04/09 12:42:36 INFO SparkContext: Submitted application: KinesisStreamingApp
+26/04/09 12:42:36 INFO ResourceProfile: Default ResourceProfile created, executor resources: Map(cores -> name: cores, amount: 2, script: , vendor: , memory -> name: memory, amount: 4921, script: , vendor: , offHeap -> name: offHeap, amount: 0, script: , vendor: ), task resources: Map(cpus -> name: cpus, amount: 1.0)
+26/04/09 12:42:36 INFO ResourceProfile: Limiting resource is cpus at 2 tasks per executor
+26/04/09 12:42:36 INFO ResourceProfileManager: Added ResourceProfile id: 0
+26/04/09 12:42:37 INFO SecurityManager: Changing view acls to: hadoop
+26/04/09 12:42:37 INFO SecurityManager: Changing modify acls to: hadoop
+26/04/09 12:42:37 INFO SecurityManager: Changing view acls groups to:
+26/04/09 12:42:37 INFO SecurityManager: Changing modify acls groups to:
+26/04/09 12:42:37 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users with view permissions: hadoop; groups with view permissions: EMPTY; users with modify permissions: hadoop; groups with modify permissions: EMPTY
+26/04/09 12:42:37 INFO Utils: Successfully started service 'sparkDriver' on port 36181.
+26/04/09 12:42:37 INFO SparkEnv: Registering MapOutputTracker
+26/04/09 12:42:37 INFO SparkEnv: Registering BlockManagerMaster
+26/04/09 12:42:37 INFO BlockManagerMasterEndpoint: Using org.apache.spark.storage.DefaultTopologyMapper for getting topology information
+26/04/09 12:42:37 INFO BlockManagerMasterEndpoint: BlockManagerMasterEndpoint up
+26/04/09 12:42:37 INFO SparkEnv: Registering BlockManagerMasterHeartbeat
+26/04/09 12:42:37 INFO DiskBlockManager: Created local directory at /mnt/tmp/blockmgr-2227752d-8470-4c31-a887-5857b573a53f
+26/04/09 12:42:37 INFO MemoryStore: MemoryStore started with capacity 912.3 MiB
+26/04/09 12:42:37 INFO SparkEnv: Registering OutputCommitCoordinator
+26/04/09 12:42:37 INFO SubResultCacheManager: Sub-result caches are disabled.
+26/04/09 12:42:37 INFO JettyUtils: Start Jetty 0.0.0.0:4040 for SparkUI
+26/04/09 12:42:37 INFO Utils: Successfully started service 'SparkUI' on port 4040.
+26/04/09 12:42:38 INFO Utils: Using 100 preallocated executors (minExecutors: 0). Set spark.dynamicAllocation.preallocateExecutors to `false` disable executor preallocation.
+26/04/09 12:42:38 INFO DefaultNoHARMFailoverProxyProvider: Connecting to ResourceManager at ip-172-31-20-201.ap-south-1.compute.internal/172.31.20.201:8032
+26/04/09 12:42:38 INFO Configuration: resource-types.xml not found
+26/04/09 12:42:38 INFO ResourceUtils: Unable to find 'resource-types.xml'.
+26/04/09 12:42:38 INFO Client: Verifying our application has not requested more than the maximum memory capability of the cluster (11712 MB per container)
+26/04/09 12:42:38 INFO Client: Will allocate AM container, with 896 MB memory including 384 MB overhead
+26/04/09 12:42:38 INFO Client: Setting up container launch context for our AM
+26/04/09 12:42:38 INFO Client: Setting up the launch environment for our AM container
+26/04/09 12:42:38 INFO Client: Preparing resources for our AM container
+26/04/09 12:42:38 WARN Client: Neither spark.yarn.jars nor spark.yarn.archive is set, falling back to uploading libraries under SPARK_HOME.
+26/04/09 12:42:42 INFO Client: Uploading resource file:/mnt/tmp/spark-7d823c48-e863-489d-9580-d7dce5525ec5/__spark_libs__5566018571060683916.zip -> hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hadoop/.sparkStaging/application_1775709409707_0021/__spark_libs__5566018571060683916.zip
+26/04/09 12:42:43 INFO Client: Uploading resource file:/etc/spark/conf.dist/hive-site.xml -> hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hadoop/.sparkStaging/application_1775709409707_0021/hive-site.xml
+26/04/09 12:42:43 INFO Client: Uploading resource file:/etc/hudi/conf.dist/hudi-defaults.conf -> hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hadoop/.sparkStaging/application_1775709409707_0021/hudi-defaults.conf
+26/04/09 12:42:43 INFO Client: Uploading resource file:/usr/lib/spark/python/lib/pyspark.zip -> hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hadoop/.sparkStaging/application_1775709409707_0021/pyspark.zip
+26/04/09 12:42:43 INFO Client: Uploading resource file:/usr/lib/spark/python/lib/py4j-0.10.9.7-src.zip -> hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hadoop/.sparkStaging/application_1775709409707_0021/py4j-0.10.9.7-src.zip
+26/04/09 12:42:43 INFO Client: Uploading resource file:/mnt/tmp/spark-7d823c48-e863-489d-9580-d7dce5525ec5/__spark_conf__3970070454605868234.zip -> hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hadoop/.sparkStaging/application_1775709409707_0021/__spark_conf__.zip
+26/04/09 12:42:43 INFO SecurityManager: Changing view acls to: hadoop
+26/04/09 12:42:43 INFO SecurityManager: Changing modify acls to: hadoop
+26/04/09 12:42:43 INFO SecurityManager: Changing view acls groups to:
+26/04/09 12:42:43 INFO SecurityManager: Changing modify acls groups to:
+26/04/09 12:42:43 INFO SecurityManager: SecurityManager: authentication disabled; ui acls disabled; users with view permissions: hadoop; groups with view permissions: EMPTY; users with modify permissions: hadoop; groups with modify permissions: EMPTY
+26/04/09 12:42:43 INFO Client: Submitting application application_1775709409707_0021 to ResourceManager
+26/04/09 12:42:43 INFO YarnClientImpl: Submitted application application_1775709409707_0021
+26/04/09 12:42:44 INFO Client: Application report for application_1775709409707_0021 (state: ACCEPTED)
+26/04/09 12:42:44 INFO Client:
+         client token: N/A
+         diagnostics: AM container is launched, waiting for AM container to Register with RM
+         ApplicationMaster host: N/A
+         ApplicationMaster RPC port: -1
+         queue: default
+         start time: 1775738563555
+         final status: UNDEFINED
+         tracking URL: http://ip-172-31-20-201.ap-south-1.compute.internal:20888/proxy/application_1775709409707_0021/
+         user: hadoop
+26/04/09 12:42:45 INFO Client: Application report for application_1775709409707_0021 (state: ACCEPTED)
+26/04/09 12:42:46 INFO Client: Application report for application_1775709409707_0021 (state: ACCEPTED)
+26/04/09 12:42:47 INFO Client: Application report for application_1775709409707_0021 (state: ACCEPTED)
+26/04/09 12:42:48 INFO Client: Application report for application_1775709409707_0021 (state: ACCEPTED)
+26/04/09 12:42:49 INFO Client: Application report for application_1775709409707_0021 (state: RUNNING)
+26/04/09 12:42:49 INFO Client:
+         client token: N/A
+         diagnostics: N/A
+         ApplicationMaster host: 172.31.20.201
+         ApplicationMaster RPC port: -1
+         queue: default
+         start time: 1775738563555
+         final status: UNDEFINED
+         tracking URL: http://ip-172-31-20-201.ap-south-1.compute.internal:20888/proxy/application_1775709409707_0021/
+         user: hadoop
+26/04/09 12:42:49 INFO YarnClientSchedulerBackend: Application application_1775709409707_0021 has started running.
+26/04/09 12:42:49 INFO Utils: Successfully started service 'org.apache.spark.network.netty.NettyBlockTransferService' on port 38563.
+26/04/09 12:42:49 INFO NettyBlockTransferService: Server created on ip-172-31-20-201.ap-south-1.compute.internal:38563
+26/04/09 12:42:49 INFO BlockManager: Using org.apache.spark.storage.RandomBlockReplicationPolicy for block replication policy
+26/04/09 12:42:49 INFO BlockManager: external shuffle service port = 7337
+26/04/09 12:42:49 INFO BlockManagerMaster: Registering BlockManager BlockManagerId(driver, ip-172-31-20-201.ap-south-1.compute.internal, 38563, None)
+26/04/09 12:42:49 INFO BlockManagerMasterEndpoint: Registering block manager ip-172-31-20-201.ap-south-1.compute.internal:38563 with 912.3 MiB RAM, BlockManagerId(driver, ip-172-31-20-201.ap-south-1.compute.internal, 38563, None)
+26/04/09 12:42:49 INFO BlockManagerMaster: Registered BlockManager BlockManagerId(driver, ip-172-31-20-201.ap-south-1.compute.internal, 38563, None)
+26/04/09 12:42:49 INFO BlockManager: Initialized BlockManager: BlockManagerId(driver, ip-172-31-20-201.ap-south-1.compute.internal, 38563, None)
+26/04/09 12:42:49 INFO YarnClientSchedulerBackend: Add WebUI Filter. org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter, Map(PROXY_HOSTS -> ip-172-31-20-201.ap-south-1.compute.internal, PROXY_URI_BASES -> http://ip-172-31-20-201.ap-south-1.compute.internal:20888/proxy/application_1775709409707_0021), /proxy/application_1775709409707_0021
+26/04/09 12:42:49 INFO SingleEventLogFileWriter: Logging events to hdfs:/var/log/spark/apps/application_1775709409707_0021.inprogress
+26/04/09 12:42:50 INFO Utils: Using 100 preallocated executors (minExecutors: 0). Set spark.dynamicAllocation.preallocateExecutors to `false` disable executor preallocation.
+26/04/09 12:42:50 WARN YarnSchedulerBackend$YarnSchedulerEndpoint: Attempted to request executors before the AM has registered!
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /jobs: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /jobs/json: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO YarnSchedulerBackend$YarnSchedulerEndpoint: ApplicationMaster registered as NettyRpcEndpointRef(spark-client://YarnAM)
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /jobs/job: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /jobs/job/json: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /stages: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /stages/json: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /stages/stage: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /stages/stage/json: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /stages/pool: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /stages/pool/json: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /storage: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /storage/json: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /storage/rdd: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /storage/rdd/json: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /environment: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /environment/json: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /executors: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /executors/json: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /executors/threadDump: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /executors/threadDump/json: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /static: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /api: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /jobs/job/kill: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /stages/stage/kill: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO ServerInfo: Adding filter to /metrics/json: org.apache.hadoop.yarn.server.webproxy.amfilter.AmIpFilter
+26/04/09 12:42:50 INFO YarnClientSchedulerBackend: SchedulerBackend is ready for scheduling beginning after reached minRegisteredResourcesRatio: 0.0
+Traceback (most recent call last):
+  File "/home/hadoop/kinesis_consumer.py", line 31, in <module>
+    .option("initialPosition", "LATEST") \
+  File "/usr/lib/spark/python/lib/pyspark.zip/pyspark/sql/streaming/readwriter.py", line 277, in load
+  File "/usr/lib/spark/python/lib/py4j-0.10.9.7-src.zip/py4j/java_gateway.py", line 1323, in __call__
+  File "/usr/lib/spark/python/lib/pyspark.zip/pyspark/errors/exceptions/captured.py", line 169, in deco
+  File "/usr/lib/spark/python/lib/py4j-0.10.9.7-src.zip/py4j/protocol.py", line 328, in get_return_value
+py4j.protocol.Py4JJavaError: An error occurred while calling o65.load.
+: org.apache.spark.SparkClassNotFoundException: [DATA_SOURCE_NOT_FOUND] Failed to find the data source: kinesis. Please find packages at `https://spark.apache.org/third-party-projects.html`.
+        at org.apache.spark.sql.errors.QueryExecutionErrors$.dataSourceNotFoundError(QueryExecutionErrors.scala:739)
+        at org.apache.spark.sql.execution.datasources.DataSource$.lookupDataSource(DataSource.scala:647)
+        at org.apache.spark.sql.streaming.DataStreamReader.loadInternal(DataStreamReader.scala:157)
+        at org.apache.spark.sql.streaming.DataStreamReader.load(DataStreamReader.scala:144)
+        at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+        at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+        at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+        at java.lang.reflect.Method.invoke(Method.java:498)
+        at py4j.reflection.MethodInvoker.invoke(MethodInvoker.java:244)
+        at py4j.reflection.ReflectionEngine.invoke(ReflectionEngine.java:374)
+        at py4j.Gateway.invoke(Gateway.java:282)
+        at py4j.commands.AbstractCommand.invokeMethod(AbstractCommand.java:132)
+        at py4j.commands.CallCommand.execute(CallCommand.java:79)
+        at py4j.ClientServerConnection.waitForCommands(ClientServerConnection.java:182)
+        at py4j.ClientServerConnection.run(ClientServerConnection.java:106)
+        at java.lang.Thread.run(Thread.java:750)
+Caused by: java.lang.ClassNotFoundException: kinesis.DefaultSource
+        at java.net.URLClassLoader.findClass(URLClassLoader.java:387)
+        at java.lang.ClassLoader.loadClass(ClassLoader.java:418)
+        at java.lang.ClassLoader.loadClass(ClassLoader.java:351)
+        at org.apache.spark.sql.execution.datasources.DataSource$.$anonfun$lookupDataSource$5(DataSource.scala:633)
+        at scala.util.Try$.apply(Try.scala:213)
+        at org.apache.spark.sql.execution.datasources.DataSource$.$anonfun$lookupDataSource$4(DataSource.scala:633)
+        at scala.util.Failure.orElse(Try.scala:224)
+        at org.apache.spark.sql.execution.datasources.DataSource$.lookupDataSource(DataSource.scala:633)
+        ... 14 more
 
-this is sales_transactions: 
-transaction_id,event_time,pharmacy_id,product_sku,batch_id,quantity_sold,unit_price,discount_pct,revenue,fulfillment_status
-T000,2026-03-27 17:32:56.976565,P04,SKU028,B046,6,134,19.965950084243,643.4737613226863,COMPLETED
-T001,2026-03-27 17:32:56.976589,P13,SKU022,B049,14,85,5.331248654908899,1219.558141006584,PENDING
-T002,2026-03-09 17:32:56.976599,P09,SKU018,B014,1,113,18.071660023529134,92.57902417341208,COMPLETED
-T003,2026-04-06 17:32:56.976606,P03,SKU020,B022,8,499,14.8855517373927,3397.7687746432835,COMPLETED
-T004,2026-03-16 17:32:56.976613,P14,SKU010,B021,10,345,26.55960760185412,2660.693537736033,PENDING
-T005,2026-03-28 17:32:56.976619,P04,SKU014,B050,1,155,6.290528532014977,145.2496807753768,PENDING
-T006,2026-04-03 17:32:56.976625,P14,SKU003,B026,1,44,11.578112938602297,38.90563030701499,COMPLETED
-T007,2026-03-12 17:32:56.976632,P09,SKU015,B041,-7,199,16.380719030353628,1164.816583907174,IN_TRANSIT
-
-this is temperature_events: 
-event_id,event_time,sensor_id,batch_id,temperature,unit,humidity
-E000,2026-03-21 17:32:56.986353,S0,B017,6.678037273858504,C,21.075656574851177
-E001,2026-03-22 17:32:56.986377,S1,B045,250.0,C,44.36666737737697
-E002,2026-03-10 17:32:56.986386,S2,B052,38.58628476592892,F,20.325601609628837
-E003,2026-03-29 17:32:56.986393,S3,B011,-120.0,C,76.20595698006503
-E004,2026-03-17 17:32:56.986398,S4,B016,7.256678277458402,C,46.395619656308014
-E005,2026-03-25 17:32:56.986404,S5,B030,6.619803156403001,C,82.75666759221147
-E006,2026-03-14 17:32:56.986409,S6,B055,-120.0,C,67.383908324557
-
-this are 3 different datasets that i have created i have the csv files of these, now i want to use the kinesis service of aws to show the live streaming of the data in delay of 30 seconds , and also that these 3 files pass through only 1 kinesis i dont want to create 3 different .i want you to guide me completely of how to implement it step by step in complete detail 
+[hadoop@ip-172-31-20-201 ~]$
