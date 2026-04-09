@@ -1,186 +1,39 @@
-26/04/09 13:54:05 INFO TaskSetManager: Starting task 2.0 in stage 2.0 (TID 10) (ip-172-31-20-201.ap-south-1.compute.internal, executor 1, partition 2, PROCESS_LOCAL, 8969 bytes)
-26/04/09 13:54:05 INFO TaskSetManager: Finished task 0.0 in stage 2.0 (TID 8) in 5333 ms on ip-172-31-20-201.ap-south-1.compute.internal (executor 1) (1/4)
-26/04/09 13:54:09 INFO TaskSetManager: Starting task 3.0 in stage 2.0 (TID 11) (ip-172-31-20-201.ap-south-1.compute.internal, executor 1, partition 3, PROCESS_LOCAL, 8969 bytes)
-26/04/09 13:54:09 INFO TaskSetManager: Finished task 1.0 in stage 2.0 (TID 9) in 10142 ms on ip-172-31-20-201.ap-south-1.compute.internal (executor 1) (2/4)
-^CERROR:root:Exception while sending command.
-Traceback (most recent call last):
-  File "/usr/lib/spark/python/lib/py4j-0.10.9.7-src.zip/py4j/clientserver.py", line 511, in send_command
-    answer = smart_decode(self.stream.readline()[:-1])
-RuntimeError: reentrant call inside <_io.BufferedReader name=3>
+# ----------------------------
+# READ FROM KINESIS
+# ----------------------------
+df = (
+    spark.readStream
+        .format("aws-kinesis")
+        .option("kinesis.streamName", "retail-stream-kritika")
+        .option("kinesis.region", "ap-south-1")
+        .option(
+            "kinesis.endpointUrl",
+            "https://kinesis.ap-south-1.amazonaws.com"
+        )
+        .option("kinesis.startingPosition", "LATEST")
+        .load()
+)
 
-During handling of the above exception, another exception occurred:
+# ----------------------------
+# PARSE JSON DATA
+# ----------------------------
+json_df = df.selectExpr("CAST(data AS STRING) AS json")
 
-Traceback (most recent call last):
-  File "/usr/lib/spark/python/lib/py4j-0.10.9.7-src.zip/py4j/java_gateway.py", line 1038, in send_command
-    response = connection.send_command(command)
-  File "/usr/lib/spark/python/lib/py4j-0.10.9.7-src.zip/py4j/clientserver.py", line 540, in send_command
-    "Error while sending or receiving", e, proto.ERROR_ON_RECEIVE)
-py4j.protocol.Py4JNetworkError: Error while sending or receiving
-26/04/09 13:54:10 INFO SparkContext: Invoking stop() from shutdown hook
-26/04/09 13:54:10 INFO SparkContext: SparkContext is stopping with exitCode 0.
-ERROR:root:Exception while sending command.
-Traceback (most recent call last):
-  File "/usr/lib/spark/python/lib/py4j-0.10.9.7-src.zip/py4j/clientserver.py", line 511, in send_command
-    answer = smart_decode(self.stream.readline()[:-1])
-  File "/usr/lib64/python3.7/socket.py", line 589, in readinto
-    return self._sock.recv_into(b)
-  File "/usr/lib/spark/python/lib/pyspark.zip/pyspark/context.py", line 380, in signal_handler
-    self.cancelAllJobs()
-  File "/usr/lib/spark/python/lib/pyspark.zip/pyspark/context.py", line 2258, in cancelAllJobs
-    self._jsc.sc().cancelAllJobs()
-  File "/usr/lib/spark/python/lib/py4j-0.10.9.7-src.zip/py4j/java_gateway.py", line 1323, in __call__
-    answer, self.gateway_client, self.target_id, self.name)
-  File "/usr/lib/spark/python/lib/pyspark.zip/pyspark/errors/exceptions/captured.py", line 169, in deco
-    return f(*a, **kw)
-  File "/usr/lib/spark/python/lib/py4j-0.10.9.7-src.zip/py4j/protocol.py", line 336, in get_return_value
-    format(target_id, ".", name))
-py4j.protocol.Py4JError: An error occurred while calling o51.sc
+parsed_df = (
+    json_df
+        .select(from_json(col("json"), schema).alias("data"))
+        .select("data.*")
+)
 
-During handling of the above exception, another exception occurred:
+# ----------------------------
+# OUTPUT TO CONSOLE
+# ----------------------------
+query = (
+    parsed_df.writeStream
+        .format("console")
+        .outputMode("append")
+        .start()
+)
 
-Traceback (most recent call last):
-  File "/usr/lib/spark/python/lib/py4j-0.10.9.7-src.zip/py4j/java_gateway.py", line 1038, in send_command
-    response = connection.send_command(command)
-  File "/usr/lib/spark/python/lib/py4j-0.10.9.7-src.zip/py4j/clientserver.py", line 540, in send_command
-    "Error while sending or receiving", e, proto.ERROR_ON_RECEIVE)
-py4j.protocol.Py4JNetworkError: Error while sending or receiving
-Traceback (most recent call last):
-  File "/home/hadoop/kinesis_consumer.py", line 63, in <module>
-    query.awaitTermination()
-  File "/usr/lib/spark/python/lib/pyspark.zip/pyspark/sql/streaming/query.py", line 201, in awaitTermination
-  File "/usr/lib/spark/python/lib/py4j-0.10.9.7-src.zip/py4j/java_gateway.py", line 1323, in __call__
-  File "/usr/lib/spark/python/lib/pyspark.zip/pyspark/errors/exceptions/captured.py", line 169, in deco
-  File "/usr/lib/spark/python/lib/py4j-0.10.9.7-src.zip/py4j/protocol.py", line 336, in get_return_value
-py4j.protocol.Py4JError: An error occurred while calling o87.awaitTermination
-26/04/09 13:54:10 INFO SparkUI: Stopped Spark web UI at http://ip-172-31-20-201.ap-south-1.compute.internal:4040
-26/04/09 13:54:10 INFO DAGScheduler: Job 2 failed: start at NativeMethodAccessorImpl.java:0, took 11.125672 s
-26/04/09 13:54:10 INFO DAGScheduler: ResultStage 2 (start at NativeMethodAccessorImpl.java:0) failed in 11.121 s due to Stage cancelled because SparkContext was shut down
-26/04/09 13:54:10 ERROR WriteToDataSourceV2Exec: Data source write support MicroBatchWrite[epoch: 2, writer: ConsoleWriter[numRows=20, truncate=true]] is aborting.
-26/04/09 13:54:10 ERROR WriteToDataSourceV2Exec: Data source write support MicroBatchWrite[epoch: 2, writer: ConsoleWriter[numRows=20, truncate=true]] aborted.
-26/04/09 13:54:10 INFO YarnClientSchedulerBackend: Interrupting monitor thread
-26/04/09 13:54:10 INFO YarnClientSchedulerBackend: Shutting down all executors
-26/04/09 13:54:10 INFO YarnSchedulerBackend$YarnDriverEndpoint: Asking each executor to shut down
-26/04/09 13:54:10 INFO YarnClientSchedulerBackend: YARN client scheduler backend Stopped
-26/04/09 13:54:10 INFO MapOutputTrackerMasterEndpoint: MapOutputTrackerMasterEndpoint stopped!
-26/04/09 13:54:10 INFO MemoryStore: MemoryStore cleared
-26/04/09 13:54:10 INFO BlockManager: BlockManager stopped
-26/04/09 13:54:10 INFO BlockManagerMaster: BlockManagerMaster stopped
-26/04/09 13:54:11 INFO OutputCommitCoordinator$OutputCommitCoordinatorEndpoint: OutputCommitCoordinator stopped!
-26/04/09 13:54:11 INFO SparkContext: Successfully stopped SparkContext
-26/04/09 13:54:11 INFO ShutdownHookManager: Shutdown hook called
-26/04/09 13:54:11 INFO ShutdownHookManager: Deleting directory /mnt/tmp/spark-db886f4b-2a0c-43f3-b116-e529eae7ffcf
-26/04/09 13:54:11 INFO ShutdownHookManager: Deleting directory /mnt/tmp/temporary-23802d80-672b-4ea7-a3ec-0bb9098304b9
-26/04/09 13:54:11 INFO ShutdownHookManager: Deleting directory /mnt/tmp/spark-fa339961-c267-4b67-b6a6-6066f8daa809/pyspark-07cba2a9-081d-404a-be0a-7fe36cce1496
-26/04/09 13:54:11 ERROR MicroBatchExecution: Query [id = b10566a7-ad3d-4969-9044-ee0c5d774306, runId = 13436341-f51e-490f-9a1e-bf67de9d22ab] terminated with error
-org.apache.spark.SparkException: Job 2 cancelled because SparkContext was shut down
-        at org.apache.spark.scheduler.DAGScheduler.$anonfun$cleanUpAfterSchedulerStop$1(DAGScheduler.scala:1269) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.scheduler.DAGScheduler.$anonfun$cleanUpAfterSchedulerStop$1$adapted(DAGScheduler.scala:1267) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at scala.collection.mutable.HashSet.foreach(HashSet.scala:79) ~[scala-library-2.12.15.jar:?]
-        at org.apache.spark.scheduler.DAGScheduler.cleanUpAfterSchedulerStop(DAGScheduler.scala:1267) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.scheduler.DAGSchedulerEventProcessLoop.onStop(DAGScheduler.scala:3206) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.util.EventLoop.stop(EventLoop.scala:84) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.scheduler.DAGScheduler.$anonfun$stop$3(DAGScheduler.scala:3091) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.util.Utils$.tryLogNonFatalError(Utils.scala:1510) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.scheduler.DAGScheduler.stop(DAGScheduler.scala:3091) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.SparkContext.$anonfun$stop$12(SparkContext.scala:2131) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.util.Utils$.tryLogNonFatalError(Utils.scala:1510) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.SparkContext.stop(SparkContext.scala:2131) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.SparkContext.stop(SparkContext.scala:2084) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.SparkContext.$anonfun$new$31(SparkContext.scala:667) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.util.SparkShutdownHook.run(ShutdownHookManager.scala:214) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.util.SparkShutdownHookManager.$anonfun$runAll$2(ShutdownHookManager.scala:188) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23) ~[scala-library-2.12.15.jar:?]
-        at org.apache.spark.util.Utils$.logUncaughtExceptions(Utils.scala:2122) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.util.SparkShutdownHookManager.$anonfun$runAll$1(ShutdownHookManager.scala:188) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23) ~[scala-library-2.12.15.jar:?]
-        at scala.util.Try$.apply(Try.scala:213) ~[scala-library-2.12.15.jar:?]
-        at org.apache.spark.util.SparkShutdownHookManager.runAll(ShutdownHookManager.scala:188) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.util.SparkShutdownHookManager$$anon$2.run(ShutdownHookManager.scala:178) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at java.util.concurrent.Executors$RunnableAdapter.call(Executors.java:511) ~[?:1.8.0_482]
-        at java.util.concurrent.FutureTask.run(FutureTask.java:266) ~[?:1.8.0_482]
-        at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1149) ~[?:1.8.0_482]
-        at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624) ~[?:1.8.0_482]
-        at java.lang.Thread.run(Thread.java:750) ~[?:1.8.0_482]
-        at org.apache.spark.scheduler.DAGScheduler.runJob(DAGScheduler.scala:1028) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.SparkContext.runJob(SparkContext.scala:2266) ~[spark-core_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.datasources.v2.V2TableWriteExec.writeWithV2(WriteToDataSourceV2Exec.scala:408) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.datasources.v2.V2TableWriteExec.writeWithV2$(WriteToDataSourceV2Exec.scala:382) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.datasources.v2.WriteToDataSourceV2Exec.writeWithV2(WriteToDataSourceV2Exec.scala:330) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.datasources.v2.WriteToDataSourceV2Exec.run(WriteToDataSourceV2Exec.scala:341) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.datasources.v2.V2CommandExec.result$lzycompute(V2CommandExec.scala:43) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.datasources.v2.V2CommandExec.result(V2CommandExec.scala:43) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.datasources.v2.V2CommandExec.executeCollect(V2CommandExec.scala:49) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.Dataset.collectFromPlan(Dataset.scala:4244) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.Dataset.$anonfun$collect$1(Dataset.scala:3462) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.Dataset.$anonfun$withAction$2(Dataset.scala:4234) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.QueryExecution$.withInternalError(QueryExecution.scala:570) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.Dataset.$anonfun$withAction$1(Dataset.scala:4232) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.catalyst.QueryPlanningTracker$.withTracker(QueryPlanningTracker.scala:107) ~[spark-catalyst_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.SQLExecution$.withTracker(SQLExecution.scala:250) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.SQLExecution$.executeQuery$1(SQLExecution.scala:123) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.SQLExecution$.$anonfun$withNewExecutionId$9(SQLExecution.scala:160) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.catalyst.QueryPlanningTracker$.withTracker(QueryPlanningTracker.scala:107) ~[spark-catalyst_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.SQLExecution$.withTracker(SQLExecution.scala:250) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.SQLExecution$.$anonfun$withNewExecutionId$8(SQLExecution.scala:160) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.SQLExecution$.withSQLConfPropagated(SQLExecution.scala:271) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.SQLExecution$.$anonfun$withNewExecutionId$1(SQLExecution.scala:159) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.SparkSession.withActive(SparkSession.scala:827) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.SQLExecution$.withNewExecutionId(SQLExecution.scala:69) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.Dataset.withAction(Dataset.scala:4232) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.Dataset.collect(Dataset.scala:3462) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.streaming.MicroBatchExecution.$anonfun$runBatch$17(MicroBatchExecution.scala:738) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.catalyst.QueryPlanningTracker$.withTracker(QueryPlanningTracker.scala:107) ~[spark-catalyst_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.SQLExecution$.withTracker(SQLExecution.scala:250) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.SQLExecution$.executeQuery$1(SQLExecution.scala:123) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.SQLExecution$.$anonfun$withNewExecutionId$9(SQLExecution.scala:160) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.catalyst.QueryPlanningTracker$.withTracker(QueryPlanningTracker.scala:107) ~[spark-catalyst_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.SQLExecution$.withTracker(SQLExecution.scala:250) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.SQLExecution$.$anonfun$withNewExecutionId$8(SQLExecution.scala:160) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.SQLExecution$.withSQLConfPropagated(SQLExecution.scala:271) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.SQLExecution$.$anonfun$withNewExecutionId$1(SQLExecution.scala:159) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.SparkSession.withActive(SparkSession.scala:827) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.SQLExecution$.withNewExecutionId(SQLExecution.scala:69) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.streaming.MicroBatchExecution.$anonfun$runBatch$16(MicroBatchExecution.scala:726) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.streaming.ProgressReporter.reportTimeTaken(ProgressReporter.scala:411) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.streaming.ProgressReporter.reportTimeTaken$(ProgressReporter.scala:409) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.streaming.StreamExecution.reportTimeTaken(StreamExecution.scala:67) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.streaming.MicroBatchExecution.runBatch(MicroBatchExecution.scala:726) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.streaming.MicroBatchExecution.$anonfun$runActivatedStream$2(MicroBatchExecution.scala:284) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23) ~[scala-library-2.12.15.jar:?]
-        at org.apache.spark.sql.execution.streaming.ProgressReporter.reportTimeTaken(ProgressReporter.scala:411) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.streaming.ProgressReporter.reportTimeTaken$(ProgressReporter.scala:409) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.streaming.StreamExecution.reportTimeTaken(StreamExecution.scala:67) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.streaming.MicroBatchExecution.$anonfun$runActivatedStream$1(MicroBatchExecution.scala:247) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.streaming.ProcessingTimeExecutor.execute(TriggerExecutor.scala:67) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.streaming.MicroBatchExecution.runActivatedStream(MicroBatchExecution.scala:237) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.streaming.StreamExecution.$anonfun$runStream$1(StreamExecution.scala:306) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23) ~[scala-library-2.12.15.jar:?]
-        at org.apache.spark.sql.SparkSession.withActive(SparkSession.scala:827) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.streaming.StreamExecution.org$apache$spark$sql$execution$streaming$StreamExecution$$runStream(StreamExecution.scala:284) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-        at org.apache.spark.sql.execution.streaming.StreamExecution$$anon$1.run(StreamExecution.scala:207) ~[spark-sql_2.12-3.4.1-amzn-2.jar:3.4.1-amzn-2]
-26/04/09 13:54:11 INFO KinesisV2MicrobatchStream: Stopping KinesisV2MicrobatchStream. deregisterStreamConsumer retail-stream-kritika -
-26/04/09 13:54:11 INFO ShutdownHookManager: Deleting directory /mnt/tmp/spark-fa339961-c267-4b67-b6a6-6066f8daa809
-26/04/09 13:54:11 INFO KinesisClientConsumerImpl: KinesisClientConsumerImpl.close for retail-stream-kritika
-26/04/09 13:54:11 INFO MicroBatchExecution: Async log purge executor pool for query [id = b10566a7-ad3d-4969-9044-ee0c5d774306, runId = 13436341-f51e-490f-9a1e-bf67de9d22ab] has been shutdown
-26/04/09 13:54:11 WARN NettyRpcEnv: Ignored failure: java.util.concurrent.RejectedExecutionException: Task java.util.concurrent.ScheduledThreadPoolExecutor$ScheduledFutureTask@1b1bbe2 rejected from java.util.concurrent.ScheduledThreadPoolExecutor@5687e945[Terminated, pool size = 0, active threads = 0, queued tasks = 0, completed tasks = 0]
-Exception in thread "stream execution thread for [id = b10566a7-ad3d-4969-9044-ee0c5d774306, runId = 13436341-f51e-490f-9a1e-bf67de9d22ab]" org.apache.spark.SparkException: Exception thrown in awaitResult:
-        at org.apache.spark.util.ThreadUtils$.awaitResult(ThreadUtils.scala:322)
-        at org.apache.spark.rpc.RpcTimeout.awaitResult(RpcTimeout.scala:75)
-        at org.apache.spark.rpc.RpcEndpointRef.askSync(RpcEndpointRef.scala:101)
-        at org.apache.spark.rpc.RpcEndpointRef.askSync(RpcEndpointRef.scala:85)
-        at org.apache.spark.sql.execution.streaming.state.StateStoreCoordinatorRef.deactivateInstances(StateStoreCoordinator.scala:119)
-        at org.apache.spark.sql.streaming.StreamingQueryManager.notifyQueryTermination(StreamingQueryManager.scala:426)
-        at org.apache.spark.sql.execution.streaming.StreamExecution.$anonfun$runStream$3(StreamExecution.scala:361)
-        at scala.runtime.java8.JFunction0$mcV$sp.apply(JFunction0$mcV$sp.java:23)
-        at org.apache.spark.util.UninterruptibleThread.runUninterruptibly(UninterruptibleThread.scala:77)
-        at org.apache.spark.sql.execution.streaming.StreamExecution.org$apache$spark$sql$execution$streaming$StreamExecution$$runStream(StreamExecution.scala:341)
-        at org.apache.spark.sql.execution.streaming.StreamExecution$$anon$1.run(StreamExecution.scala:207)
-Caused by: org.apache.spark.rpc.RpcEnvStoppedException: RpcEnv already stopped.
-        at org.apache.spark.rpc.netty.Dispatcher.postMessage(Dispatcher.scala:176)
-        at org.apache.spark.rpc.netty.Dispatcher.postLocalMessage(Dispatcher.scala:144)
-        at org.apache.spark.rpc.netty.NettyRpcEnv.askAbortable(NettyRpcEnv.scala:242)
-        at org.apache.spark.rpc.netty.NettyRpcEndpointRef.askAbortable(NettyRpcEnv.scala:554)
-        at org.apache.spark.rpc.netty.NettyRpcEndpointRef.ask(NettyRpcEnv.scala:558)
-        at org.apache.spark.rpc.RpcEndpointRef.askSync(RpcEndpointRef.scala:100)
-        ... 8 more
-[hadoop@ip-172-31-20-201 ~]$
+query.awaitTermination()
+"kinesis_consumer.py" 63L, 1569B                                                                                                  63,24         Bot
