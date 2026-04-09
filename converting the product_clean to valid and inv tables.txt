@@ -1,0 +1,99 @@
+hive> CREATE TABLE product_master_valid AS
+    > SELECT *
+    > FROM product_master_clean
+    > WHERE
+    >     min_temp_c IS NULL
+    >     OR max_temp_c IS NULL
+    >     OR min_temp_c <= max_temp_c;
+Query ID = hadoop_20260409094311_b9614964-e43a-40a6-919e-30c97ecf06c0
+Total jobs = 1
+Launching Job 1 out of 1
+Tez session was closed. Reopening...
+Session re-established.
+Session re-established.
+Status: Running (Executing on YARN cluster with App id application_1775709409707_0011)
+
+Map 1: -/-
+Map 1: 0/1
+Map 1: 0(+1)/1
+Map 1: 1/1
+Moving data to directory hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hive/warehouse/pharma_db_kritika.db/product_master_valid
+OK
+Time taken: 10.299 seconds
+hive> CREATE TABLE product_master_invalid AS
+    > SELECT *
+    > FROM product_master_clean
+    > WHERE min_temp_c > max_temp_c;
+Query ID = hadoop_20260409094329_cdcf7269-6305-487b-95c8-c3b4ff7ab16f
+Total jobs = 1
+Launching Job 1 out of 1
+Status: Running (Executing on YARN cluster with App id application_1775709409707_0011)
+
+Map 1: -/-
+Map 1: 0/1
+Map 1: 0(+1)/1
+Map 1: 1/1
+Moving data to directory hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hive/warehouse/pharma_db_kritika.db/product_master_invalid
+OK
+Time taken: 5.339 seconds
+hive> SELECT COUNT(*) FROM product_master_clean;
+OK
+30
+Time taken: 0.059 seconds, Fetched: 1 row(s)
+hive> SELECT COUNT(*) FROM product_master_valid;
+OK
+26
+Time taken: 0.055 seconds, Fetched: 1 row(s)
+hive> SELECT COUNT(*) FROM product_master_invalid;
+OK
+4
+Time taken: 0.051 seconds, Fetched: 1 row(s)
+hive> SELECT *
+    > FROM product_master_invalid;
+OK
+SKU002  Analgesic_Drug_SKU002   Analgesic       Tablet  1g      false   false   10.0    5.0     106     239.0
+SKU003  Antibiotic_Drug_SKU003  Antibiotic      Tablet  1g      false   false   10.0    5.0     137     152.0
+SKU025  Analgesic_Drug_SKU025   Analgesic       Tablet  250mg   false   false   10.0    5.0     68      273.0
+SKU027  Antibiotic_Drug_SKU027  Antibiotic      Capsule 500mg   false   false   10.0    5.0     158     220.0
+Time taken: 0.059 seconds, Fetched: 4 row(s)
+hive> SELECT *
+    > FROM product_master_valid
+    > WHERE min_temp_c > max_temp_c;
+OK
+Time taken: 0.067 seconds
+hive> SELECT *
+    > FROM product_master_valid
+    > WHERE min_temp_c > max_temp_c;
+OK
+Time taken: 0.062 seconds
+hive> SELECT *
+    > FROM product_master_valid;
+OK
+SKU000  Vaccine_Drug_SKU000     Vaccine Injection       250mg   true    true    NULL    NULL    85      387.0
+SKU001  Analgesic_Drug_SKU001   Analgesic       Capsule 500mg   true    false   NULL    NULL    57      57.0
+SKU004  Analgesic_Drug_SKU004   Analgesic       Tablet  500mg   true    false   NULL    NULL    141     443.0
+SKU005  Antibiotic_Drug_SKU005  Antibiotic      Injection       1g      true    true    NULL    NULL    146     50.0
+SKU006  Antibiotic_Drug_SKU006  Antibiotic      Injection       1g      true    false   NULL    NULL    67      33.0
+SKU007  Vaccine_Drug_SKU007     Vaccine Tablet  250mg   true    true    2.0     8.0     147     152.0
+SKU008  Antibiotic_Drug_SKU008  Antibiotic      Injection       250mg   false   false   NULL    NULL    68      321.0
+SKU009  Vaccine_Drug_SKU009     Vaccine Tablet  250mg   false   true    2.0     8.0     147     148.0
+SKU010  Cardiac_Drug_SKU010     Cardiac Capsule 500mg   true    false   NULL    NULL    108     430.0
+SKU011  Analgesic_Drug_SKU011   Analgesic       Tablet  1g      false   false   NULL    NULL    104     345.0
+SKU012  Antibiotic_Drug_SKU012  Antibiotic      Tablet  500mg   true    false   NULL    NULL    113     391.0
+SKU013  Antibiotic_Drug_SKU013  Antibiotic      Capsule 500mg   false   true    2.0     8.0     106     80.0
+SKU014  Antibiotic_Drug_SKU014  Antibiotic      Tablet  250mg   true    true    NULL    NULL    158     315.0
+SKU015  Analgesic_Drug_SKU015   Analgesic       Capsule 500mg   true    false   NULL    NULL    79      359.0
+SKU016  Cardiac_Drug_SKU016     Cardiac Injection       250mg   false   false   NULL    NULL    161     90.0
+SKU017  Antibiotic_Drug_SKU017  Antibiotic      Injection       1g      true    false   NULL    NULL    179     477.0
+SKU018  Analgesic_Drug_SKU018   Analgesic       Capsule 1g      true    false   NULL    NULL    89      201.0
+SKU019  Vaccine_Drug_SKU019     Vaccine Capsule 250mg   false   true    2.0     8.0     175     19.0
+SKU020  Analgesic_Drug_SKU020   Analgesic       Injection       250mg   true    false   NULL    NULL    111     459.0
+SKU021  Antibiotic_Drug_SKU021  Antibiotic      Tablet  1g      true    true    2.0     8.0     82      347.0
+SKU022  Antibiotic_Drug_SKU022  Antibiotic      Capsule 500mg   true    false   NULL    NULL    188     396.0
+SKU023  Vaccine_Drug_SKU023     Vaccine Injection       500mg   false   true    2.0     8.0     162     470.0
+SKU024  Antibiotic_Drug_SKU024  Antibiotic      Injection       250mg   true    true    2.0     8.0     200     122.0
+SKU026  Analgesic_Drug_SKU026   Analgesic       Tablet  1g      false   false   NULL    NULL    112     411.0
+SKU028  Antibiotic_Drug_SKU028  Antibiotic      Capsule 250mg   true    false   NULL    NULL    153     382.0
+SKU029  Antibiotic_Drug_SKU029  Antibiotic      Tablet  1g      false   false   NULL    NULL    85      226.0
+Time taken: 0.068 seconds, Fetched: 26 row(s)
+hive>
