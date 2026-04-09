@@ -1,0 +1,52 @@
+file of inventory_snapshots
+snapshot_date,distributor_id,product_sku,batch_id,opening_stock,receipts,dispatches,adjustments,returns,closing_stock,reorder_point
+2026-03-28 17:32:56.968621,D04,SKU023,B001,60,99,120,-18,40,61,141
+2026-04-05 17:32:56.968640,D09,SKU023,B048,453,17,88,-5,46,423,135
+2026-04-03 17:32:56.968648,D07,SKU022,B030,118,11,90,14,21,74,96
+2026-04-07 17:32:56.968655,D03,SKU028,B002,465,34,16,9,2,494,130
+2026-03-15 17:32:56.968662,D03,SKU009,B022,208,131,101,14,30,282,62
+2026-03-26 17:32:56.968669,D06,SKU023,B028,493,167,84,-3,7,580,148
+2026-03-23 17:32:56.968675,D04,SKU025,B005,223,47,127,11,23,177,158
+2026-04-05 17:32:56.968681,D01,SKU010,B042,90,110,154,-9,34,71,125
+2026-03-28 17:32:56.968687,D07,SKU001,B046,206,114,154,7,10,183,140
+
+file of batch_master
+batch_id,product_sku,manufacture_date,expiry_date,batch_qty,min_temp_c,max_temp_c,batch_status
+B000,SKU005,2026-03-31 17:32:56.901387,2026-12-22 17:32:56.901387,177,,,QUARANTINE
+B001,SKU025,2026-03-12 17:32:56.902402,2026-03-07 17:32:56.902402,195,10.0,5.0,RELEASED
+B002,SKU005,2026-03-26 17:32:56.903272,2026-12-29 17:32:56.903272,985,,,QUARANTINE
+B003,SKU028,2026-04-07 17:32:56.904069,2026-07-30 17:32:56.904069,499,,,QUARANTINE
+B004,SKU029,2026-03-14 17:32:56.904904,2026-12-01 17:32:56.904904,813,,,RECALLED
+B005,SKU025,2026-03-22 17:32:56.905737,2026-12-26 17:32:56.905737,403,10.0,5.0,RELEASED
+B006,SKU001,2026-03-21 17:32:56.906554,2027-01-22 17:32:56.906554,158,10.0,5.0,RELEASED
+B007,SKU018,2026-03-24 17:32:56.907385,2027-01-05 17:32:56.907385,643,,,RELEASED
+B008,SKU001,2026-03-09 17:32:56.908157,2026-03-04 17:32:56.908157,170,,,RECALLED
+
+Field Type Nullable Description
+batch_id String No Uniquebatchidentifier—naturalkeyforall joins
+product_sku String No Product inthisbatch—FKtodim_product
+plant_id String No Manufacturingplant—FKtodim_plant
+manufacture_date Date No Dateproductionwascompleted
+expiry_date Date No Batchexpirydate
+batch_qty Integer No Totalunitsproduced
+min_temp_c Decimal Yes Coldchainminimumstoragetemperatureallowed
+max_temp_c Decimal Yes Coldchainmaximumstoragetemperatureallowed
+batch_status String No RELEASED/QUARANTINE/RECALLED/
+EXPIRED
+release_date Date Yes QAreleasedate—null ifnotyetreleased
+recall_date Date Yes Daterecalled—null ifnotrecalled
+recall_reason String Yes Descriptionofrecallreason
+
+Field Type Nullable Description
+snapshot_date Date No Dateof thisclosingbalancesnapshot
+distributor_id String No Distributor—FKtodim_distributor
+product_sku String No Product—FKtodim_product
+batch_id String Yes Batchtrackedat thislevel ifavailable
+opening_stock Integer No Stockatstartofday
+receipts Integer No Unitsreceivedduringtheday
+dispatches Integer No Unitsdispatchedduringtheday
+adjustments Integer No Write-offsandcorrections
+returns Integer No Unitsreturnedfrompharmacies
+closing_stock Integer No Calculated:openingplusreceiptsminusdispatches
+plusreturnsplusadjustments
+reorder_point Integer Yes Minimumreorderthreshold
