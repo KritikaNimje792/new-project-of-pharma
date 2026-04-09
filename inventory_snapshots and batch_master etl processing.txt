@@ -1,5 +1,24 @@
- 
-
+hive> CREATE EXTERNAL TABLE inventory_snapshots_raw (
+    >     snapshot_date STRING,
+    >     distributor_id STRING,
+    >     product_sku STRING,
+    >     batch_id STRING,
+    >     opening_stock STRING,
+    >     receipts STRING,
+    >     dispatches STRING,
+    >     adjustments STRING,
+    >     returns STRING,
+    >     closing_stock STRING,
+    >     reorder_point STRING
+    > )
+    > ROW FORMAT DELIMITED
+    > FIELDS TERMINATED BY ','
+    > STORED AS TEXTFILE
+    > LOCATION '/user/hadoop/inventory_snapshots';
+FAILED: Execution Error, return code 1 from org.apache.hadoop.hive.ql.exec.DDLTask. AlreadyExistsException(message:Table hive.pharma_db_kritika.inventory_snapshots_raw already exists)
+hive> drop table inventory_snapshots_raw;
+OK
+Time taken: 0.045 seconds
 hive> CREATE EXTERNAL TABLE inventory_snapshots_raw (
     >     snapshot_date STRING,
     >     distributor_id STRING,
@@ -18,8 +37,12 @@ hive> CREATE EXTERNAL TABLE inventory_snapshots_raw (
     > STORED AS TEXTFILE
     > LOCATION '/user/hadoop/inventory_snapshots';
 OK
-Time taken: 0.662 seconds
-hive> CREATE TABLE inventory_snapshots_clean AS
+Time taken: 0.031 seconds
+hive> DROP TABLE IF EXISTS inventory_snapshots_clean;
+OK
+Time taken: 0.008 seconds
+hive>
+    > CREATE TABLE inventory_snapshots_clean AS
     > SELECT
     >     CAST(snapshot_date AS TIMESTAMP) AS snapshot_date,
     >     distributor_id,
@@ -36,30 +59,36 @@ hive> CREATE TABLE inventory_snapshots_clean AS
     >     CAST(NULLIF(TRIM(reorder_point), '') AS INT) AS reorder_point
     >
     > FROM inventory_snapshots_raw;
-Query ID = hadoop_20260409104041_8452ebb2-de2c-4fa3-afe2-3a135b266387
+Query ID = hadoop_20260409105906_a3967d6b-f6dc-4ac7-b159-dddffadc717b
 Total jobs = 1
 Launching Job 1 out of 1
-Status: Running (Executing on YARN cluster with App id application_1775709409707_0014)
+Status: Running (Executing on YARN cluster with App id application_1775709409707_0015)
 
 Map 1: -/-
-Moving data to directory hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hive/warehouse/inventory_snapshots_clean
+Map 1: 0/1
+Map 1: 0(+1)/1
+Map 1: 1/1
+Moving data to directory hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hive/warehouse/pharma_db_kritika.db/inventory_snapshots_clean
 OK
-Time taken: 2.974 seconds
+Time taken: 4.706 seconds
 hive> CREATE TABLE inventory_snapshots_valid AS
     > SELECT *
     > FROM inventory_snapshots_clean
     > WHERE
     >     closing_stock =
     >     (opening_stock + receipts - dispatches + returns + adjustments);
-Query ID = hadoop_20260409104055_1bda4db7-735f-4dcc-8499-3d588dc93171
+Query ID = hadoop_20260409105920_af32cbed-18fc-497a-92d9-ecc22bddd1f2
 Total jobs = 1
 Launching Job 1 out of 1
-Status: Running (Executing on YARN cluster with App id application_1775709409707_0014)
+Status: Running (Executing on YARN cluster with App id application_1775709409707_0015)
 
 Map 1: -/-
-Moving data to directory hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hive/warehouse/inventory_snapshots_valid
+Map 1: 0/1
+Map 1: 0(+1)/1
+Map 1: 1/1
+Moving data to directory hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hive/warehouse/pharma_db_kritika.db/inventory_snapshots_valid
 OK
-Time taken: 0.446 seconds
+Time taken: 4.818 seconds
 hive> CREATE TABLE inventory_snapshots_invalid AS
     > SELECT *,
     >     'Stock mismatch' AS invalid_reason
@@ -67,25 +96,27 @@ hive> CREATE TABLE inventory_snapshots_invalid AS
     > WHERE
     >     closing_stock !=
     >     (opening_stock + receipts - dispatches + returns + adjustments);
-Query ID = hadoop_20260409104104_27aa7cf5-f8e7-477a-8c2f-9b7e04240560
+Query ID = hadoop_20260409105930_20b1bc32-ea39-4201-8bc3-aeed10d63238
 Total jobs = 1
 Launching Job 1 out of 1
-Status: Running (Executing on YARN cluster with App id application_1775709409707_0014)
+Status: Running (Executing on YARN cluster with App id application_1775709409707_0015)
 
 Map 1: -/-
-Moving data to directory hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hive/warehouse/inventory_snapshots_invalid
+Map 1: 1/1
+Moving data to directory hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hive/warehouse/pharma_db_kritika.db/inventory_snapshots_invalid
 OK
-Time taken: 0.399 seconds
+Time taken: 0.614 seconds
 hive> SELECT COUNT(*) FROM inventory_snapshots_clean;
 OK
-0
-Time taken: 0.168 seconds, Fetched: 1 row(s)
+201
+Time taken: 0.104 seconds, Fetched: 1 row(s)
 hive> SELECT COUNT(*) FROM inventory_snapshots_valid;
 OK
-0
-Time taken: 0.058 seconds, Fetched: 1 row(s)
+165
+Time taken: 0.053 seconds, Fetched: 1 row(s)
 hive> SELECT COUNT(*) FROM inventory_snapshots_invalid;
 OK
-0
-Time taken: 0.056 seconds, Fetched: 1 row(s)
+35
+Time taken: 0.052 seconds, Fetched: 1 row(s)
 hive>
+
