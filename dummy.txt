@@ -1,52 +1,37 @@
-file of inventory_snapshots
-snapshot_date,distributor_id,product_sku,batch_id,opening_stock,receipts,dispatches,adjustments,returns,closing_stock,reorder_point
-2026-03-28 17:32:56.968621,D04,SKU023,B001,60,99,120,-18,40,61,141
-2026-04-05 17:32:56.968640,D09,SKU023,B048,453,17,88,-5,46,423,135
-2026-04-03 17:32:56.968648,D07,SKU022,B030,118,11,90,14,21,74,96
-2026-04-07 17:32:56.968655,D03,SKU028,B002,465,34,16,9,2,494,130
-2026-03-15 17:32:56.968662,D03,SKU009,B022,208,131,101,14,30,282,62
-2026-03-26 17:32:56.968669,D06,SKU023,B028,493,167,84,-3,7,580,148
-2026-03-23 17:32:56.968675,D04,SKU025,B005,223,47,127,11,23,177,158
-2026-04-05 17:32:56.968681,D01,SKU010,B042,90,110,154,-9,34,71,125
-2026-03-28 17:32:56.968687,D07,SKU001,B046,206,114,154,7,10,183,140
+this file is inventory_events:
+event_id,event_time,distributor_id,product_sku,batch_id,change_type,quantity_delta,current_stock
+IE000,2026-03-21 17:32:57.019559,D02,SKU021,B028,INVALID,95,358
+IE001,2026-04-03 17:32:57.019593,D08,SKU027,B002,RECEIPT,34,331
+IE002,2026-03-13 17:32:57.019600,D07,SKU024,B026,RECEIPT,19,372
+IE003,2026-04-02 17:32:57.019605,D09,SKU023,B053,RECEIPT,85,333
+IE004,2026-04-07 17:32:57.019610,D02,SKU014,B025,RECEIPT,83,467
+IE005,2026-03-22 17:32:57.019615,D03,SKU012,B043,DISPATCH,-61,379
+IE006,2026-04-08 17:32:57.019620,D04,SKU029,B051,INVALID,-34,439
+IE007,2026-03-09 17:32:57.019625,D00,SKU003,B058,DISPATCH,-87,342
+IE008,2026-03-29 17:32:57.019629,D04,SKU008,B051,DISPATCH,-79,80
+IE009,2026-03-18 17:32:57.019634,D03,SKU023,B043,DISPATCH,-84,179
+IE010,2026-03-29 17:32:57.019639,D08,SKU000,B043,RETURN,44,-12
+IE011,2026-03-18 17:32:57.019643,D07,SKU011,B014,RECEIPT,2,270
 
-file of batch_master
-batch_id,product_sku,manufacture_date,expiry_date,batch_qty,min_temp_c,max_temp_c,batch_status
-B000,SKU005,2026-03-31 17:32:56.901387,2026-12-22 17:32:56.901387,177,,,QUARANTINE
-B001,SKU025,2026-03-12 17:32:56.902402,2026-03-07 17:32:56.902402,195,10.0,5.0,RELEASED
-B002,SKU005,2026-03-26 17:32:56.903272,2026-12-29 17:32:56.903272,985,,,QUARANTINE
-B003,SKU028,2026-04-07 17:32:56.904069,2026-07-30 17:32:56.904069,499,,,QUARANTINE
-B004,SKU029,2026-03-14 17:32:56.904904,2026-12-01 17:32:56.904904,813,,,RECALLED
-B005,SKU025,2026-03-22 17:32:56.905737,2026-12-26 17:32:56.905737,403,10.0,5.0,RELEASED
-B006,SKU001,2026-03-21 17:32:56.906554,2027-01-22 17:32:56.906554,158,10.0,5.0,RELEASED
-B007,SKU018,2026-03-24 17:32:56.907385,2027-01-05 17:32:56.907385,643,,,RELEASED
-B008,SKU001,2026-03-09 17:32:56.908157,2026-03-04 17:32:56.908157,170,,,RECALLED
+this is sales_transactions: 
+transaction_id,event_time,pharmacy_id,product_sku,batch_id,quantity_sold,unit_price,discount_pct,revenue,fulfillment_status
+T000,2026-03-27 17:32:56.976565,P04,SKU028,B046,6,134,19.965950084243,643.4737613226863,COMPLETED
+T001,2026-03-27 17:32:56.976589,P13,SKU022,B049,14,85,5.331248654908899,1219.558141006584,PENDING
+T002,2026-03-09 17:32:56.976599,P09,SKU018,B014,1,113,18.071660023529134,92.57902417341208,COMPLETED
+T003,2026-04-06 17:32:56.976606,P03,SKU020,B022,8,499,14.8855517373927,3397.7687746432835,COMPLETED
+T004,2026-03-16 17:32:56.976613,P14,SKU010,B021,10,345,26.55960760185412,2660.693537736033,PENDING
+T005,2026-03-28 17:32:56.976619,P04,SKU014,B050,1,155,6.290528532014977,145.2496807753768,PENDING
+T006,2026-04-03 17:32:56.976625,P14,SKU003,B026,1,44,11.578112938602297,38.90563030701499,COMPLETED
+T007,2026-03-12 17:32:56.976632,P09,SKU015,B041,-7,199,16.380719030353628,1164.816583907174,IN_TRANSIT
 
-Field Type Nullable Description
-batch_id String No Uniquebatchidentifier—naturalkeyforall joins
-product_sku String No Product inthisbatch—FKtodim_product
-plant_id String No Manufacturingplant—FKtodim_plant
-manufacture_date Date No Dateproductionwascompleted
-expiry_date Date No Batchexpirydate
-batch_qty Integer No Totalunitsproduced
-min_temp_c Decimal Yes Coldchainminimumstoragetemperatureallowed
-max_temp_c Decimal Yes Coldchainmaximumstoragetemperatureallowed
-batch_status String No RELEASED/QUARANTINE/RECALLED/
-EXPIRED
-release_date Date Yes QAreleasedate—null ifnotyetreleased
-recall_date Date Yes Daterecalled—null ifnotrecalled
-recall_reason String Yes Descriptionofrecallreason
+this is temperature_events: 
+event_id,event_time,sensor_id,batch_id,temperature,unit,humidity
+E000,2026-03-21 17:32:56.986353,S0,B017,6.678037273858504,C,21.075656574851177
+E001,2026-03-22 17:32:56.986377,S1,B045,250.0,C,44.36666737737697
+E002,2026-03-10 17:32:56.986386,S2,B052,38.58628476592892,F,20.325601609628837
+E003,2026-03-29 17:32:56.986393,S3,B011,-120.0,C,76.20595698006503
+E004,2026-03-17 17:32:56.986398,S4,B016,7.256678277458402,C,46.395619656308014
+E005,2026-03-25 17:32:56.986404,S5,B030,6.619803156403001,C,82.75666759221147
+E006,2026-03-14 17:32:56.986409,S6,B055,-120.0,C,67.383908324557
 
-Field Type Nullable Description
-snapshot_date Date No Dateof thisclosingbalancesnapshot
-distributor_id String No Distributor—FKtodim_distributor
-product_sku String No Product—FKtodim_product
-batch_id String Yes Batchtrackedat thislevel ifavailable
-opening_stock Integer No Stockatstartofday
-receipts Integer No Unitsreceivedduringtheday
-dispatches Integer No Unitsdispatchedduringtheday
-adjustments Integer No Write-offsandcorrections
-returns Integer No Unitsreturnedfrompharmacies
-closing_stock Integer No Calculated:openingplusreceiptsminusdispatches
-plusreturnsplusadjustments
-reorder_point Integer Yes Minimumreorderthreshold
+this are 3 different datasets that i have created i have the csv files of these, now i want to use the kinesis service of aws to show the live streaming of the data in delay of 30 seconds , and also that these 3 files pass through only 1 kinesis i dont want to create 3 different .i want you to guide me completely of how to implement it step by step in complete detail 
