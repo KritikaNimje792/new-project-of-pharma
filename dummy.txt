@@ -1,79 +1,188 @@
-[hadoop@ip-172-31-20-201 ~]$ spark-submit \
-> --packages org.apache.spark:spark-sql-kinesis_2.12:3.4.1 \
-> kinesis_consumer.py
-:: loading settings :: url = jar:file:/usr/lib/spark/jars/ivy-2.5.1.jar!/org/apache/ivy/core/settings/ivysettings.xml
-Ivy Default Cache set to: /home/hadoop/.ivy2/cache
-The jars for the packages stored in: /home/hadoop/.ivy2/jars
-org.apache.spark#spark-sql-kinesis_2.12 added as a dependency
-:: resolving dependencies :: org.apache.spark#spark-submit-parent-087488c3-a42f-44f4-8470-b840f4b28bd4;1.0
-        confs: [default]
-:: resolution report :: resolve 2045ms :: artifacts dl 1ms
-        :: modules in use:
-        ---------------------------------------------------------------------
-        |                  |            modules            ||   artifacts   |
-        |       conf       | number| search|dwnlded|evicted|| number|dwnlded|
-        ---------------------------------------------------------------------
-        |      default     |   1   |   0   |   0   |   0   ||   0   |   0   |
-        ---------------------------------------------------------------------
-
-:: problems summary ::
-:::: WARNINGS
-                module not found: org.apache.spark#spark-sql-kinesis_2.12;3.4.1
-
-        ==== local-m2-cache: tried
-
-          file:/home/hadoop/.m2/repository/org/apache/spark/spark-sql-kinesis_2.12/3.4.1/spark-sql-kinesis_2.12-3.4.1.pom
-
-          -- artifact org.apache.spark#spark-sql-kinesis_2.12;3.4.1!spark-sql-kinesis_2.12.jar:
-
-          file:/home/hadoop/.m2/repository/org/apache/spark/spark-sql-kinesis_2.12/3.4.1/spark-sql-kinesis_2.12-3.4.1.jar
-
-        ==== local-ivy-cache: tried
-
-          /home/hadoop/.ivy2/local/org.apache.spark/spark-sql-kinesis_2.12/3.4.1/ivys/ivy.xml
-
-          -- artifact org.apache.spark#spark-sql-kinesis_2.12;3.4.1!spark-sql-kinesis_2.12.jar:
-
-          /home/hadoop/.ivy2/local/org.apache.spark/spark-sql-kinesis_2.12/3.4.1/jars/spark-sql-kinesis_2.12.jar
-
-        ==== central: tried
-
-          https://repo1.maven.org/maven2/org/apache/spark/spark-sql-kinesis_2.12/3.4.1/spark-sql-kinesis_2.12-3.4.1.pom
-
-          -- artifact org.apache.spark#spark-sql-kinesis_2.12;3.4.1!spark-sql-kinesis_2.12.jar:
-
-          https://repo1.maven.org/maven2/org/apache/spark/spark-sql-kinesis_2.12/3.4.1/spark-sql-kinesis_2.12-3.4.1.jar
-
-        ==== spark-packages: tried
-
-          https://repos.spark-packages.org/org/apache/spark/spark-sql-kinesis_2.12/3.4.1/spark-sql-kinesis_2.12-3.4.1.pom
-
-          -- artifact org.apache.spark#spark-sql-kinesis_2.12;3.4.1!spark-sql-kinesis_2.12.jar:
-
-          https://repos.spark-packages.org/org/apache/spark/spark-sql-kinesis_2.12/3.4.1/spark-sql-kinesis_2.12-3.4.1.jar
-
-                ::::::::::::::::::::::::::::::::::::::::::::::
-
-                ::          UNRESOLVED DEPENDENCIES         ::
-
-                ::::::::::::::::::::::::::::::::::::::::::::::
-
-                :: org.apache.spark#spark-sql-kinesis_2.12;3.4.1: not found
-
-                ::::::::::::::::::::::::::::::::::::::::::::::
-
-
-
-:: USE VERBOSE OR DEBUG MESSAGE LEVEL FOR MORE DETAILS
-Exception in thread "main" java.lang.RuntimeException: [unresolved dependency: org.apache.spark#spark-sql-kinesis_2.12;3.4.1: not found]
-        at org.apache.spark.deploy.SparkSubmitUtils$.resolveMavenCoordinates(SparkSubmit.scala:1575)
-        at org.apache.spark.util.DependencyUtils$.resolveMavenDependencies(DependencyUtils.scala:185)
-        at org.apache.spark.deploy.SparkSubmit.prepareSubmitEnvironment(SparkSubmit.scala:335)
-        at org.apache.spark.deploy.SparkSubmit.org$apache$spark$deploy$SparkSubmit$$runMain(SparkSubmit.scala:1001)
-        at org.apache.spark.deploy.SparkSubmit.doRunMain$1(SparkSubmit.scala:192)
-        at org.apache.spark.deploy.SparkSubmit.submit(SparkSubmit.scala:215)
-        at org.apache.spark.deploy.SparkSubmit.doSubmit(SparkSubmit.scala:91)
-        at org.apache.spark.deploy.SparkSubmit$$anon$2.doSubmit(SparkSubmit.scala:1158)
-        at org.apache.spark.deploy.SparkSubmit$.main(SparkSubmit.scala:1167)
-        at org.apache.spark.deploy.SparkSubmit.main(SparkSubmit.scala)
-[hadoop@ip-172-31-20-201 ~]$
+org/apache/spark
+../
+spark-assembly_2.10/                                             -         -      
+spark-assembly_2.9.3/                                            -         -      
+spark-avro_2.11/                                                 -         -      
+spark-avro_2.12/                                                 -         -      
+spark-avro_2.13/                                                 -         -      
+spark-bagel_2.10/                                                -         -      
+spark-bagel_2.11/                                                -         -      
+spark-bagel_2.9.3/                                               -         -      
+spark-catalyst_2.10/                                             -         -      
+spark-catalyst_2.11/                                             -         -      
+spark-catalyst_2.12/                                             -         -      
+spark-catalyst_2.13/                                             -         -      
+spark-common-utils-java_2.13/                                    -         -      
+spark-common-utils_2.12/                                         -         -      
+spark-common-utils_2.13/                                         -         -      
+spark-connect-client-jdbc_2.13/                                  -         -      
+spark-connect-client-jvm_2.12/                                   -         -      
+spark-connect-client-jvm_2.13/                                   -         -      
+spark-connect-common_2.12/                                       -         -      
+spark-connect-common_2.13/                                       -         -      
+spark-connect-shims_2.13/                                        -         -      
+spark-connect_2.12/                                              -         -      
+spark-connect_2.13/                                              -         -      
+spark-core_2.10/                                                 -         -      
+spark-core_2.11/                                                 -         -      
+spark-core_2.12/                                                 -         -      
+spark-core_2.13/                                                 -         -      
+spark-core_2.9.3/                                                -         -      
+spark-cypher_2.12/                                               -         -      
+spark-docker-integration-tests_2.10/                             -         -      
+spark-docker-integration-tests_2.11/                             -         -      
+spark-examples_2.10/                                             -         -      
+spark-examples_2.9.3/                                            -         -      
+spark-ganglia-lgpl_2.10/                                         -         -      
+spark-ganglia-lgpl_2.11/                                         -         -      
+spark-ganglia-lgpl_2.12/                                         -         -      
+spark-ganglia-lgpl_2.13/                                         -         -      
+spark-graph-api_2.12/                                            -         -      
+spark-graph_2.12/                                                -         -      
+spark-graphx_2.10/                                               -         -      
+spark-graphx_2.11/                                               -         -      
+spark-graphx_2.12/                                               -         -      
+spark-graphx_2.13/                                               -         -      
+spark-hadoop-cloud_2.12/                                         -         -      
+spark-hadoop-cloud_2.13/                                         -         -      
+spark-hive-thriftserver_2.10/                                    -         -      
+spark-hive-thriftserver_2.11/                                    -         -      
+spark-hive-thriftserver_2.12/                                    -         -      
+spark-hive-thriftserver_2.13/                                    -         -      
+spark-hive_2.10/                                                 -         -      
+spark-hive_2.11/                                                 -         -      
+spark-hive_2.12/                                                 -         -      
+spark-hive_2.13/                                                 -         -      
+spark-hivecontext-compatibility_2.10/                            -         -      
+spark-hivecontext-compatibility_2.11/                            -         -      
+spark-kubernetes_2.11/                                           -         -      
+spark-kubernetes_2.12/                                           -         -      
+spark-kubernetes_2.13/                                           -         -      
+spark-kvstore_2.11/                                              -         -      
+spark-kvstore_2.12/                                              -         -      
+spark-kvstore_2.13/                                              -         -      
+spark-launcher_2.10/                                             -         -      
+spark-launcher_2.11/                                             -         -      
+spark-launcher_2.12/                                             -         -      
+spark-launcher_2.13/                                             -         -      
+spark-mesos_2.10/                                                -         -      
+spark-mesos_2.11/                                                -         -      
+spark-mesos_2.12/                                                -         -      
+spark-mesos_2.13/                                                -         -      
+spark-mllib-local_2.10/                                          -         -      
+spark-mllib-local_2.11/                                          -         -      
+spark-mllib-local_2.12/                                          -         -      
+spark-mllib-local_2.13/                                          -         -      
+spark-mllib_2.10/                                                -         -      
+spark-mllib_2.11/                                                -         -      
+spark-mllib_2.12/                                                -         -      
+spark-mllib_2.13/                                                -         -      
+spark-mllib_2.9.3/                                               -         -      
+spark-network-common_2.10/                                       -         -      
+spark-network-common_2.11/                                       -         -      
+spark-network-common_2.12/                                       -         -      
+spark-network-common_2.13/                                       -         -      
+spark-network-shuffle_2.10/                                      -         -      
+spark-network-shuffle_2.11/                                      -         -      
+spark-network-shuffle_2.12/                                      -         -      
+spark-network-shuffle_2.13/                                      -         -      
+spark-network-yarn_2.10/                                         -         -      
+spark-network-yarn_2.11/                                         -         -      
+spark-network-yarn_2.12/                                         -         -      
+spark-network-yarn_2.13/                                         -         -      
+spark-parent/                                                    -         -      
+spark-parent_2.10/                                               -         -      
+spark-parent_2.11/                                               -         -      
+spark-parent_2.12/                                               -         -      
+spark-parent_2.13/                                               -         -      
+spark-pipelines_2.13/                                            -         -      
+spark-profiler_2.13/                                             -         -      
+spark-protobuf_2.12/                                             -         -      
+spark-protobuf_2.13/                                             -         -      
+spark-repl-bin_2.9.3/                                            -         -      
+spark-repl_2.10/                                                 -         -      
+spark-repl_2.11/                                                 -         -      
+spark-repl_2.12/                                                 -         -      
+spark-repl_2.13/                                                 -         -      
+spark-repl_2.9.3/                                                -         -      
+spark-sketch_2.10/                                               -         -      
+spark-sketch_2.11/                                               -         -      
+spark-sketch_2.12/                                               -         -      
+spark-sketch_2.13/                                               -         -      
+spark-sql-api_2.12/                                              -         -      
+spark-sql-api_2.13/                                              -         -      
+spark-sql-kafka-0-10_2.10/                                       -         -      
+spark-sql-kafka-0-10_2.11/                                       -         -      
+spark-sql-kafka-0-10_2.12/                                       -         -      
+spark-sql-kafka-0-10_2.13/                                       -         -      
+spark-sql_2.10/                                                  -         -      
+spark-sql_2.11/                                                  -         -      
+spark-sql_2.12/                                                  -         -      
+spark-sql_2.13/                                                  -         -      
+spark-streaming-flume-assembly_2.10/                             -         -      
+spark-streaming-flume-assembly_2.11/                             -         -      
+spark-streaming-flume-assembly_2.12/                             -         -      
+spark-streaming-flume-sink_2.10/                                 -         -      
+spark-streaming-flume-sink_2.11/                                 -         -      
+spark-streaming-flume-sink_2.12/                                 -         -      
+spark-streaming-flume_2.10/                                      -         -      
+spark-streaming-flume_2.11/                                      -         -      
+spark-streaming-flume_2.12/                                      -         -      
+spark-streaming-kafka-0-10-assembly_2.10/                        -         -      
+spark-streaming-kafka-0-10-assembly_2.11/                        -         -      
+spark-streaming-kafka-0-10-assembly_2.12/                        -         -      
+spark-streaming-kafka-0-10-assembly_2.13/                        -         -      
+spark-streaming-kafka-0-10_2.10/                                 -         -      
+spark-streaming-kafka-0-10_2.11/                                 -         -      
+spark-streaming-kafka-0-10_2.12/                                 -         -      
+spark-streaming-kafka-0-10_2.13/                                 -         -      
+spark-streaming-kafka-0-8-assembly_2.10/                         -         -      
+spark-streaming-kafka-0-8-assembly_2.11/                         -         -      
+spark-streaming-kafka-0-8_2.10/                                  -         -      
+spark-streaming-kafka-0-8_2.11/                                  -         -      
+spark-streaming-kafka-assembly_2.10/                             -         -      
+spark-streaming-kafka-assembly_2.11/                             -         -      
+spark-streaming-kafka_2.10/                                      -         -      
+spark-streaming-kafka_2.11/                                      -         -      
+spark-streaming-kinesis-asl-assembly_2.10/                       -         -      
+spark-streaming-kinesis-asl-assembly_2.11/                       -         -      
+spark-streaming-kinesis-asl_2.10/                                -         -      
+spark-streaming-kinesis-asl_2.11/                                -         -      
+spark-streaming-kinesis-asl_2.12/                                -         -      
+spark-streaming-kinesis-asl_2.13/                                -         -      
+spark-streaming-mqtt-assembly_2.10/                              -         -      
+spark-streaming-mqtt-assembly_2.11/                              -         -      
+spark-streaming-mqtt_2.10/                                       -         -      
+spark-streaming-mqtt_2.11/                                       -         -      
+spark-streaming-twitter_2.10/                                    -         -      
+spark-streaming-twitter_2.11/                                    -         -      
+spark-streaming-zeromq_2.10/                                     -         -      
+spark-streaming-zeromq_2.11/                                     -         -      
+spark-streaming_2.10/                                            -         -      
+spark-streaming_2.11/                                            -         -      
+spark-streaming_2.12/                                            -         -      
+spark-streaming_2.13/                                            -         -      
+spark-streaming_2.9.3/                                           -         -      
+spark-tags_2.10/                                                 -         -      
+spark-tags_2.11/                                                 -         -      
+spark-tags_2.12/                                                 -         -      
+spark-tags_2.13/                                                 -         -      
+spark-test-tags_2.10/                                            -         -      
+spark-test-tags_2.11/                                            -         -      
+spark-token-provider-kafka-0-10_2.12/                            -         -      
+spark-token-provider-kafka-0-10_2.13/                            -         -      
+spark-tools_2.10/                                                -         -      
+spark-tools_2.9.3/                                               -         -      
+spark-unsafe_2.10/                                               -         -      
+spark-unsafe_2.11/                                               -         -      
+spark-unsafe_2.12/                                               -         -      
+spark-unsafe_2.13/                                               -         -      
+spark-variant_2.13/                                              -         -      
+spark-yarn_2.10/                                                 -         -      
+spark-yarn_2.11/                                                 -         -      
+spark-yarn_2.12/                                                 -         -      
+spark-yarn_2.13/                                                 -         -      
+spark-yarn_2.9.3/                                                -         -      
+yarn-parent_2.10/                                                -         -      
+yarn-parent_2.11/                                                -         -      
+		
