@@ -1,0 +1,187 @@
+batch processing through rds: 
+
+CREATE TABLE qc_results (
+    qc_id            VARCHAR(10)      NOT NULL,
+    batch_id         VARCHAR(10)      NOT NULL,
+    product_sku      VARCHAR(20)      NOT NULL,
+    test_datetime    DATETIME(6)       NOT NULL,
+    potency_pct      DECIMAL(18,8)     NOT NULL,
+    overall_result   ENUM('PASS','FAIL') NOT NULL,
+    failure_reason   VARCHAR(255),
+
+    PRIMARY KEY (qc_id)
+);
+
+
+MySQL [pharma_kritika]> LOAD DATA LOCAL INFILE '/home/ec2-user/qc_results.csv'
+    -> INTO TABLE qc_results
+    -> FIELDS TERMINATED BY ','
+    -> ENCLOSED BY '"'
+    -> LINES TERMINATED BY '\n'
+    -> IGNORE 1 ROWS
+    -> (
+    ->   qc_id,
+    ->   batch_id,
+    ->   product_sku,
+    ->   test_datetime,
+    ->   potency_pct,
+    ->   overall_result,
+    ->   failure_reason
+    -> );
+Query OK, 200 rows affected, 200 warnings (0.009 sec)
+Records: 200  Deleted: 0  Skipped: 0  Warnings: 200
+
+MySQL [pharma_kritika]> -- Row count
+MySQL [pharma_kritika]> SELECT COUNT(*) FROM qc_results;
++----------+
+| COUNT(*) |
++----------+
+|      200 |
++----------+
+1 row in set (0.001 sec)
+
+MySQL [pharma_kritika]>
+MySQL [pharma_kritika]> -- Check PASS vs FAIL
+MySQL [pharma_kritika]> SELECT overall_result, COUNT(*)
+    -> FROM qc_results
+    -> GROUP BY overall_result;
++----------------+----------+
+| overall_result | COUNT(*) |
++----------------+----------+
+| PASS           |      179 |
+| FAIL           |       21 |
++----------------+----------+
+2 rows in set (0.003 sec)
+
+MySQL [pharma_kritika]>
+MySQL [pharma_kritika]> -- Failed QC with reasons
+MySQL [pharma_kritika]> SELECT *
+    -> FROM qc_results
+    -> WHERE overall_result = 'FAIL';
++-------+----------+-------------+----------------------------+--------------+----------------+----------------+
+| qc_id | batch_id | product_sku | test_datetime              | potency_pct  | overall_result | failure_reason |
++-------+----------+-------------+----------------------------+--------------+----------------+----------------+
+ |QC015 | B048     | SKU023      | 2026-03-22 17:32:56.961212 | 105.04732745 | FAIL           | Contamination
+ |QC016 | B003     | SKU020      | 2026-04-07 17:32:56.961217 |  99.50432280 | FAIL           | Contamination
+ |QC026 | B027     | SKU013      | 2026-04-03 17:32:56.961287 | 104.86121933 | FAIL           | Contamination
+ |QC058 | B037     | SKU001      | 2026-03-15 17:32:56.961476 | 100.16844753 | FAIL           | Contamination
+ |QC069 | B053     | SKU015      | 2026-03-10 17:32:56.961530 |  83.52398447 | FAIL           | Contamination
+              |    | SKU008      | 2026-03-18 17:32:56.961633 |  93.83449740 | FAIL           |
+ |QC097 | B057     | SKU007      | 2026-03-19 17:32:56.961666 |  86.90355173 | FAIL           | Contamination
+ |QC102 | B056     | SKU008      | 2026-03-10 17:32:56.961690 | 107.40460923 | FAIL           | Contamination
+ |QC103 | B052     | SKU025      | 2026-04-05 17:32:56.961695 |  88.85424348 | FAIL           | Contamination
+              |    | SKU023      | 2026-03-18 17:32:56.961700 | 108.99500628 | FAIL           |
+ |QC105 | B025     | SKU000      | 2026-03-31 17:32:56.961704 |  90.97325148 | FAIL           | Contamination
+ |QC109 | UNKNOWN  | SKU009      | 2026-03-24 17:32:56.961724 |  92.24887567 | FAIL           | Contamination
+ |QC114 | B006     | SKU001      | 2026-03-27 17:32:56.961760 | 107.05088637 | FAIL           | Contamination
+              |    | SKU016      | 2026-03-30 17:32:56.961832 | 103.49680988 | FAIL           |
+              |    | SKU003      | 2026-03-21 17:32:56.961912 |  88.62888223 | FAIL           |
+ |QC158 | B012     | SKU026      | 2026-04-04 17:32:56.962016 | 101.82137317 | FAIL           | Contamination
+ |QC173 | UNKNOWN  | SKU029      | 2026-03-28 17:32:56.962090 |  84.51119982 | FAIL           | Contamination
+ |QC174 | B019     | SKU002      | 2026-03-30 17:32:56.962095 |  91.75873953 | FAIL           | Contamination
+ |QC176 | UNKNOWN  | SKU016      | 2026-03-28 17:32:56.962107 | 107.37343956 | FAIL           | Contamination
+ |QC185 | B036     | SKU016      | 2026-03-26 17:32:56.962148 |  88.45315198 | FAIL           | Contamination
+ |QC187 | B035     | SKU014      | 2026-03-11 17:32:56.962158 | 123.20624668 | FAIL           | Contamination
++-------+----------+-------------+----------------------------+--------------+----------------+----------------+
+21 rows in set (0.001 sec)
+
+MySQL [pharma_kritika]> 
+
+
+MySQL [pharma_kritika]> drop table product_master;
+Query OK, 0 rows affected (0.016 sec)
+
+MySQL [pharma_kritika]> CREATE TABLE product_master (
+    ->     product_sku            VARCHAR(20)   NOT NULL,
+    ->     product_name           VARCHAR(150)  NOT NULL,
+    ->     generic_name           VARCHAR(150)  NULL,
+    ->     category               VARCHAR(50)   NULL,
+    ->     dosage_form            VARCHAR(50)   NULL,
+    ->     strength               VARCHAR(50)   NULL,
+    ->     schedule               VARCHAR(20)   NULL,
+    ->     controlled_flag        BOOLEAN       NOT NULL,
+    ->     cold_chain_required    BOOLEAN       NOT NULL,
+    ->     min_temp_c             DECIMAL(5,2)  NULL,
+    ->     max_temp_c             DECIMAL(5,2)  NULL,
+    ->     reorder_point_units    INT           NULL,
+    ->     unit_cost_inr          DECIMAL(10,2) NULL,
+    ->     unit_price_mrp_inr     DECIMAL(10,2) NOT NULL,
+    ->     is_active              BOOLEAN       NOT NULL DEFAULT TRUE,
+    ->
+    ->     PRIMARY KEY (product_sku)
+    -> );
+Query OK, 0 rows affected (0.049 sec)
+
+MySQL [pharma_kritika]> LOAD DATA LOCAL INFILE '/home/ec2-user/product_master.csv'
+    -> INTO TABLE product_master
+    -> FIELDS TERMINATED BY ','
+    -> ENCLOSED BY '"'
+    -> LINES TERMINATED BY '\n'
+    -> IGNORE 1 ROWS
+    -> (
+    ->   product_sku,
+    ->   product_name,
+    ->   category,
+    ->   dosage_form,
+    ->   strength,
+    ->   controlled_flag,
+    ->   cold_chain_required,
+    ->   @min_temp_c,
+    ->   @max_temp_c,
+    ->   reorder_point_units,
+    ->   unit_price_mrp_inr
+    -> )
+    -> SET
+    ->   min_temp_c = NULLIF(@min_temp_c, ''),
+    ->   max_temp_c = NULLIF(@max_temp_c, ''),
+    ->   is_active = TRUE;
+Query OK, 30 rows affected, 60 warnings (0.011 sec)
+Records: 30  Deleted: 0  Skipped: 0  Warnings: 60
+
+MySQL [pharma_kritika]> ``
+    -> ;
+ERROR 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near '``' at line 1
+MySQL [pharma_kritika]> -- Row count
+MySQL [pharma_kritika]> SELECT COUNT(*) FROM product_master;
++----------+
+| COUNT(*) |
++----------+
+|       30 |
++----------+
+1 row in set (0.001 sec)
+
+MySQL [pharma_kritika]>
+MySQL [pharma_kritika]> -- Sample data
+MySQL [pharma_kritika]> SELECT * FROM product_master LIMIT 5;
++-------------+------------------------+--------------+------------+-------------+----------+----------+-----------------+---------------------+------------+------------+---------------------+---------------+--------------------+-----------+
+| product_sku | product_name           | generic_name | category   | dosage_form | strength | schedule | controlled_flag | cold_chain_required | min_temp_c | max_temp_c | reorder_point_units | unit_cost_inr | unit_price_mrp_inr | is_active |
++-------------+------------------------+--------------+------------+-------------+----------+----------+-----------------+---------------------+------------+------------+---------------------+---------------+--------------------+-----------+
+| SKU000      | Vaccine_Drug_SKU000    | NULL         | Vaccine    | Injection   | 250mg    | NULL     |               0 |                   0 |       NULL |       NULL |                  85 |          NULL |             387.00 |         1 |
+| SKU001      | Analgesic_Drug_SKU001  | NULL         | Analgesic  | Capsule     | 500mg    | NULL     |               0 |                   0 |       NULL |       NULL |                  57 |          NULL |              57.00 |         1 |
+| SKU002      | Analgesic_Drug_SKU002  | NULL         | Analgesic  | Tablet      | 1g       | NULL     |               0 |                   0 |      10.00 |       5.00 |                 106 |          NULL |             239.00 |         1 |
+| SKU003      | Antibiotic_Drug_SKU003 | NULL         | Antibiotic | Tablet      | 1g       | NULL     |               0 |                   0 |      10.00 |       5.00 |                 137 |          NULL |             152.00 |         1 |
+| SKU004      | Analgesic_Drug_SKU004  | NULL         | Analgesic  | Tablet      | 500mg    | NULL     |               0 |                   0 |       NULL |       NULL |                 141 |          NULL |             443.00 |         1 |
++-------------+------------------------+--------------+------------+-------------+----------+----------+-----------------+---------------------+------------+------------+---------------------+---------------+--------------------+-----------+
+5 rows in set (0.001 sec)
+
+MySQL [pharma_kritika]>
+MySQL [pharma_kritika]> -- Null SKU check (critical)
+MySQL [pharma_kritika]> SELECT COUNT(*)
+    -> FROM product_master
+    -> WHERE product_sku IS NULL OR product_sku = '';
++----------+
+| COUNT(*) |
++----------+
+|        0 |
++----------+
+1 row in set (0.001 sec)
+
+MySQL [pharma_kritika]>
+MySQL [pharma_kritika]> -- Duplicate SKU check
+MySQL [pharma_kritika]> SELECT product_sku, COUNT(*)
+    -> FROM product_master
+    -> GROUP BY product_sku
+    -> HAVING COUNT(*) > 1;
+Empty set (0.018 sec)
+
+MySQL [pharma_kritika]>
