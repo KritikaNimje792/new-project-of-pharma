@@ -1,5 +1,21 @@
-
-Logging initialized using configuration in file:/etc/hive/conf.dist/hive-log4j2.properties Async: true
+hive> DROP TABLE product_master_clean;
+OK
+Time taken: 0.952 seconds
+hive> CREATE TABLE product_master_clean (
+    >     product_sku STRING,
+    >     product_name STRING,
+    >     category STRING,
+    >     dosage_form STRING,
+    >     strength STRING,
+    >     controlled_flag BOOLEAN,
+    >     cold_chain_required BOOLEAN,
+    >     min_temp_c DOUBLE,
+    >     max_temp_c DOUBLE,
+    >     reorder_point_units INT,
+    >     unit_price DOUBLE
+    > );
+OK
+Time taken: 0.204 seconds
 hive> INSERT INTO product_master_clean
     > SELECT
     >     product_sku,
@@ -8,30 +24,27 @@ hive> INSERT INTO product_master_clean
     >     dosage_form,
     >     strength,
     >
-    >     -- BOOLEAN conversion
+    >     -- FIXED BOOLEAN LOGIC
     >     CASE
-    >         WHEN LOWER(controlled_flag) = 'true' THEN TRUE
+    >         WHEN LOWER(TRIM(controlled_flag)) IN ('true', '1') THEN TRUE
     >         ELSE FALSE
     >     END AS controlled_flag,
     >
     >     CASE
-    >         WHEN LOWER(cold_chain_required) = 'true' THEN TRUE
+    >         WHEN LOWER(TRIM(cold_chain_required)) IN ('true', '1') THEN TRUE
     >         ELSE FALSE
     >     END AS cold_chain_required,
     >
-    >     -- Handle empty → NULL
-    >     CAST(NULLIF(min_temp_c, '') AS DOUBLE) AS min_temp_c,
-    >     CAST(NULLIF(max_temp_c, '') AS DOUBLE) AS max_temp_c,
-    >
-    >     CAST(NULLIF(reorder_point_units, '') AS INT) AS reorder_point_units,
-    >
-    >     CAST(NULLIF(unit_price_mrp_inr, '') AS DOUBLE) AS unit_price
+    >     CAST(NULLIF(min_temp_c, '') AS DOUBLE),
+    >     CAST(NULLIF(max_temp_c, '') AS DOUBLE),
+    >     CAST(NULLIF(reorder_point_units, '') AS INT),
+    >     CAST(NULLIF(unit_price_mrp_inr, '') AS DOUBLE)
     >
     > FROM product_master_raw;
-Query ID = hadoop_20260409084406_a773b830-c368-478e-9063-4cf96198ffc0
+Query ID = hadoop_20260409085450_15f95540-2ca9-4a3e-a75b-5bf2aba602b3
 Total jobs = 1
 Launching Job 1 out of 1
-Status: Running (Executing on YARN cluster with App id application_1775709409707_0006)
+Status: Running (Executing on YARN cluster with App id application_1775709409707_0007)
 
 Map 1: -/-      Reducer 2: 0/1
 Map 1: 0/1      Reducer 2: 0/1
@@ -40,88 +53,14 @@ Map 1: 1/1      Reducer 2: 0(+1)/1
 Map 1: 1/1      Reducer 2: 1/1
 Loading data to table default.product_master_clean
 OK
-Time taken: 9.601 seconds
-hive> CREATE TABLE product_master_invalid AS
-    > SELECT *
-    > FROM product_master_clean
-    > WHERE min_temp_c > max_temp_c;
-Query ID = hadoop_20260409084442_5eba966e-0936-4fc6-98e2-df31b12a2c7b
-Total jobs = 1
-Launching Job 1 out of 1
-Status: Running (Executing on YARN cluster with App id application_1775709409707_0006)
-
-Map 1: -/-
-Map 1: 0/1
-Map 1: 0(+1)/1
-Map 1: 1/1
-Moving data to directory hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hive/warehouse/product_master_invalid
-OK
-Time taken: 5.649 seconds
-hive> SELECT DISTINCT category FROM product_master_clean;
-Query ID = hadoop_20260409084515_28a55f42-b9ee-4c7e-9d52-d1b367e64e28
-Total jobs = 1
-Launching Job 1 out of 1
-Status: Running (Executing on YARN cluster with App id application_1775709409707_0006)
-
-Map 1: -/-      Reducer 2: 0/2
-Map 1: 0/1      Reducer 2: 0/2
-Map 1: 0(+1)/1  Reducer 2: 0/2
-Map 1: 1/1      Reducer 2: 0(+1)/2
-Map 1: 1/1      Reducer 2: 2/2
-OK
-Antibiotic
-Analgesic
-Cardiac
-Vaccine
-Time taken: 5.478 seconds, Fetched: 4 row(s)
-hive> SELECT COUNT(*)
-    > FROM product_master_clean
-    > WHERE product_sku IS NULL;
-Query ID = hadoop_20260409084549_2eab22dd-a14e-4c76-b06e-5735d5416827
-Total jobs = 1
-Launching Job 1 out of 1
-Status: Running (Executing on YARN cluster with App id application_1775709409707_0006)
-
-Map 1: -/-      Reducer 2: 0/1
-Map 1: 0/1      Reducer 2: 0/1
-Map 1: 0(+1)/1  Reducer 2: 0/1
-Map 1: 1/1      Reducer 2: 0(+1)/1
-Map 1: 1/1      Reducer 2: 1/1
-OK
-0
-Time taken: 5.417 seconds, Fetched: 1 row(s)
-hive> SELECT product_sku, COUNT(*)
-    > FROM product_master_clean
-    > GROUP BY product_sku
-    > HAVING COUNT(*) > 1;
-Query ID = hadoop_20260409084606_d0f8a31e-9858-4d7e-9b83-3fb91d5ce8d8
-Total jobs = 1
-Launching Job 1 out of 1
-Status: Running (Executing on YARN cluster with App id application_1775709409707_0006)
-
-Map 1: -/-      Reducer 2: 0/2
-Map 1: 0/1      Reducer 2: 0/2
-Map 1: 0(+1)/1  Reducer 2: 0/2
-Map 1: 1/1      Reducer 2: 0(+1)/2
-Map 1: 1/1      Reducer 2: 2/2
-OK
-Time taken: 5.499 seconds
-hive> SELECT *
-    > FROM product_master_clean
-    > WHERE min_temp_c > max_temp_c;
-OK
-SKU002  Analgesic_Drug_SKU002   Analgesic       Tablet  1g      false   false   10.0    5.0     106     239.0
-SKU003  Antibiotic_Drug_SKU003  Antibiotic      Tablet  1g      false   false   10.0    5.0     137     152.0
-SKU025  Analgesic_Drug_SKU025   Analgesic       Tablet  250mg   false   false   10.0    5.0     68      273.0
-SKU027  Antibiotic_Drug_SKU027  Antibiotic      Capsule 500mg   false   false   10.0    5.0     158     220.0
-Time taken: 0.085 seconds, Fetched: 4 row(s)
+Time taken: 8.728 seconds
 hive> SELECT controlled_flag, COUNT(*)
     > FROM product_master_clean
     > GROUP BY controlled_flag;
-Query ID = hadoop_20260409084631_43e59568-853e-4848-a2d1-fd5936f93b68
+Query ID = hadoop_20260409085505_6454227f-88a4-47de-90f1-048564951d07
 Total jobs = 1
 Launching Job 1 out of 1
-Status: Running (Executing on YARN cluster with App id application_1775709409707_0006)
+Status: Running (Executing on YARN cluster with App id application_1775709409707_0007)
 
 Map 1: -/-      Reducer 2: 0/2
 Map 1: 0/1      Reducer 2: 0/2
@@ -130,5 +69,38 @@ Map 1: 1/1      Reducer 2: 0(+1)/2
 Map 1: 1/1      Reducer 2: 2/2
 OK
 false   30
-Time taken: 5.128 seconds, Fetched: 1 row(s)
+Time taken: 5.84 seconds, Fetched: 1 row(s)
+hive> select * from product_master_raw;
+OK
+SKU000  Vaccine_Drug_SKU000     null    Vaccine Injection       250mg   null    false   false   null    null    85      null    387.00  true
+SKU001  Analgesic_Drug_SKU001   null    Analgesic       Capsule 500mg   null    false   false   null    null    57      null    57.00   true
+SKU002  Analgesic_Drug_SKU002   null    Analgesic       Tablet  1g      null    false   false   10.00   5.00    106     null    239.00  true
+SKU003  Antibiotic_Drug_SKU003  null    Antibiotic      Tablet  1g      null    false   false   10.00   5.00    137     null    152.00  true
+SKU004  Analgesic_Drug_SKU004   null    Analgesic       Tablet  500mg   null    false   false   null    null    141     null    443.00  true
+SKU005  Antibiotic_Drug_SKU005  null    Antibiotic      Injection       1g      null    false   false   null    null    146     null    50.00   true
+SKU006  Antibiotic_Drug_SKU006  null    Antibiotic      Injection       1g      null    false   false   null    null    67      null    33.00   true
+SKU007  Vaccine_Drug_SKU007     null    Vaccine Tablet  250mg   null    false   false   2.00    8.00    147     null    152.00  true
+SKU008  Antibiotic_Drug_SKU008  null    Antibiotic      Injection       250mg   null    false   false   null    null    68      null    321.00  true
+SKU009  Vaccine_Drug_SKU009     null    Vaccine Tablet  250mg   null    false   false   2.00    8.00    147     null    148.00  true
+SKU010  Cardiac_Drug_SKU010     null    Cardiac Capsule 500mg   null    false   false   null    null    108     null    430.00  true
+SKU011  Analgesic_Drug_SKU011   null    Analgesic       Tablet  1g      null    false   false   null    null    104     null    345.00  true
+SKU012  Antibiotic_Drug_SKU012  null    Antibiotic      Tablet  500mg   null    false   false   null    null    113     null    391.00  true
+SKU013  Antibiotic_Drug_SKU013  null    Antibiotic      Capsule 500mg   null    false   false   2.00    8.00    106     null    80.00   true
+SKU014  Antibiotic_Drug_SKU014  null    Antibiotic      Tablet  250mg   null    false   false   null    null    158     null    315.00  true
+SKU015  Analgesic_Drug_SKU015   null    Analgesic       Capsule 500mg   null    false   false   null    null    79      null    359.00  true
+SKU016  Cardiac_Drug_SKU016     null    Cardiac Injection       250mg   null    false   false   null    null    161     null    90.00   true
+SKU017  Antibiotic_Drug_SKU017  null    Antibiotic      Injection       1g      null    false   false   null    null    179     null    477.00  true
+SKU018  Analgesic_Drug_SKU018   null    Analgesic       Capsule 1g      null    false   false   null    null    89      null    201.00  true
+SKU019  Vaccine_Drug_SKU019     null    Vaccine Capsule 250mg   null    false   false   2.00    8.00    175     null    19.00   true
+SKU020  Analgesic_Drug_SKU020   null    Analgesic       Injection       250mg   null    false   false   null    null    111     null    459.00  true
+SKU021  Antibiotic_Drug_SKU021  null    Antibiotic      Tablet  1g      null    false   false   2.00    8.00    82      null    347.00  true
+SKU022  Antibiotic_Drug_SKU022  null    Antibiotic      Capsule 500mg   null    false   false   null    null    188     null    396.00  true
+SKU023  Vaccine_Drug_SKU023     null    Vaccine Injection       500mg   null    false   false   2.00    8.00    162     null    470.00  true
+SKU024  Antibiotic_Drug_SKU024  null    Antibiotic      Injection       250mg   null    false   false   2.00    8.00    200     null    122.00  true
+SKU025  Analgesic_Drug_SKU025   null    Analgesic       Tablet  250mg   null    false   false   10.00   5.00    68      null    273.00  true
+SKU026  Analgesic_Drug_SKU026   null    Analgesic       Tablet  1g      null    false   false   null    null    112     null    411.00  true
+SKU027  Antibiotic_Drug_SKU027  null    Antibiotic      Capsule 500mg   null    false   false   10.00   5.00    158     null    220.00  true
+SKU028  Antibiotic_Drug_SKU028  null    Antibiotic      Capsule 250mg   null    false   false   null    null    153     null    382.00  true
+SKU029  Antibiotic_Drug_SKU029  null    Antibiotic      Tablet  1g      null    false   false   null    null    85      null    226.00  true
+Time taken: 0.077 seconds, Fetched: 30 row(s)
 hive>
