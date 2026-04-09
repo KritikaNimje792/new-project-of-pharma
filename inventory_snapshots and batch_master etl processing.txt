@@ -1,0 +1,91 @@
+ 
+
+hive> CREATE EXTERNAL TABLE inventory_snapshots_raw (
+    >     snapshot_date STRING,
+    >     distributor_id STRING,
+    >     product_sku STRING,
+    >     batch_id STRING,
+    >     opening_stock STRING,
+    >     receipts STRING,
+    >     dispatches STRING,
+    >     adjustments STRING,
+    >     returns STRING,
+    >     closing_stock STRING,
+    >     reorder_point STRING
+    > )
+    > ROW FORMAT DELIMITED
+    > FIELDS TERMINATED BY ','
+    > STORED AS TEXTFILE
+    > LOCATION '/user/hadoop/inventory_snapshots';
+OK
+Time taken: 0.662 seconds
+hive> CREATE TABLE inventory_snapshots_clean AS
+    > SELECT
+    >     CAST(snapshot_date AS TIMESTAMP) AS snapshot_date,
+    >     distributor_id,
+    >     product_sku,
+    >     batch_id,
+    >
+    >     CAST(opening_stock AS INT) AS opening_stock,
+    >     CAST(receipts AS INT) AS receipts,
+    >     CAST(dispatches AS INT) AS dispatches,
+    >     CAST(adjustments AS INT) AS adjustments,
+    >     CAST(returns AS INT) AS returns,
+    >     CAST(closing_stock AS INT) AS closing_stock,
+    >
+    >     CAST(NULLIF(TRIM(reorder_point), '') AS INT) AS reorder_point
+    >
+    > FROM inventory_snapshots_raw;
+Query ID = hadoop_20260409104041_8452ebb2-de2c-4fa3-afe2-3a135b266387
+Total jobs = 1
+Launching Job 1 out of 1
+Status: Running (Executing on YARN cluster with App id application_1775709409707_0014)
+
+Map 1: -/-
+Moving data to directory hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hive/warehouse/inventory_snapshots_clean
+OK
+Time taken: 2.974 seconds
+hive> CREATE TABLE inventory_snapshots_valid AS
+    > SELECT *
+    > FROM inventory_snapshots_clean
+    > WHERE
+    >     closing_stock =
+    >     (opening_stock + receipts - dispatches + returns + adjustments);
+Query ID = hadoop_20260409104055_1bda4db7-735f-4dcc-8499-3d588dc93171
+Total jobs = 1
+Launching Job 1 out of 1
+Status: Running (Executing on YARN cluster with App id application_1775709409707_0014)
+
+Map 1: -/-
+Moving data to directory hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hive/warehouse/inventory_snapshots_valid
+OK
+Time taken: 0.446 seconds
+hive> CREATE TABLE inventory_snapshots_invalid AS
+    > SELECT *,
+    >     'Stock mismatch' AS invalid_reason
+    > FROM inventory_snapshots_clean
+    > WHERE
+    >     closing_stock !=
+    >     (opening_stock + receipts - dispatches + returns + adjustments);
+Query ID = hadoop_20260409104104_27aa7cf5-f8e7-477a-8c2f-9b7e04240560
+Total jobs = 1
+Launching Job 1 out of 1
+Status: Running (Executing on YARN cluster with App id application_1775709409707_0014)
+
+Map 1: -/-
+Moving data to directory hdfs://ip-172-31-20-201.ap-south-1.compute.internal:8020/user/hive/warehouse/inventory_snapshots_invalid
+OK
+Time taken: 0.399 seconds
+hive> SELECT COUNT(*) FROM inventory_snapshots_clean;
+OK
+0
+Time taken: 0.168 seconds, Fetched: 1 row(s)
+hive> SELECT COUNT(*) FROM inventory_snapshots_valid;
+OK
+0
+Time taken: 0.058 seconds, Fetched: 1 row(s)
+hive> SELECT COUNT(*) FROM inventory_snapshots_invalid;
+OK
+0
+Time taken: 0.056 seconds, Fetched: 1 row(s)
+hive>
