@@ -1,39 +1,21 @@
-# ----------------------------
-# READ FROM KINESIS
-# ----------------------------
-df = (
-    spark.readStream
-        .format("aws-kinesis")
-        .option("kinesis.streamName", "retail-stream-kritika")
-        .option("kinesis.region", "ap-south-1")
-        .option(
-            "kinesis.endpointUrl",
-            "https://kinesis.ap-south-1.amazonaws.com"
-        )
-        .option("kinesis.startingPosition", "LATEST")
-        .load()
-)
-
-# ----------------------------
-# PARSE JSON DATA
-# ----------------------------
-json_df = df.selectExpr("CAST(data AS STRING) AS json")
-
-parsed_df = (
-    json_df
-        .select(from_json(col("json"), schema).alias("data"))
-        .select("data.*")
-)
-
-# ----------------------------
-# OUTPUT TO CONSOLE
-# ----------------------------
-query = (
-    parsed_df.writeStream
-        .format("console")
-        .outputMode("append")
-        .start()
-)
-
-query.awaitTermination()
-"kinesis_consumer.py" 63L, 1569B                                                                                                  63,24         Bot
+spark-sql (default)> SELECT
+                   >     transaction_id,
+                   >     pharmacy_id,
+                   >     quantity_sold,
+                   >     revenue,
+                   >     fulfillment_status,
+                   >     event_time
+                   > FROM pharma_streaming_db.sales_streaming
+                   > LIMIT 10;
+T105    P12     1       400.15376270329585      COMPLETED       2026-04-05 17:32:56.977233
+T132    P10     1       62.34683984893135       PENDING 2026-03-11 17:32:56.977474
+T045    P12     3       745.3054869101131       COMPLETED       2026-03-20 17:32:56.976918
+T160    P04     7       2379.261506740545       COMPLETED       2026-03-22 17:32:56.977607
+T010    P11     2       317.21126299876744      COMPLETED       2026-03-24 17:32:56.976649
+T138    P12     4       886.6229704710024       COMPLETED       2026-03-16 17:32:56.977504
+T013    P13     5       684.7137826234259       COMPLETED       2026-03-22 17:32:56.976666
+T027    P06     1       333.3278254070943       COMPLETED       2026-03-14 17:32:56.976799
+T010    P11     2       317.21126299876744      COMPLETED       2026-03-24 17:32:56.976649
+T110    P07     4       563.6089606805895       COMPLETED       2026-03-30 17:32:56.977262
+Time taken: 10.929 seconds, Fetched 10 row(s)
+spark-sql (default)>
