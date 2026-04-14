@@ -1,35 +1,47 @@
-7.1 Cold Chain Monitoring Dashboard
-Audience: Supply chain operations, warehouse managers.
-A. Breach timeline showing temperature readings against the allowed band for any selected batch over
-the last 24 hours.(Line chart with a reference band. X axis is event_time, Y axis is temperature_c. A
-horizontal reference band shaded in light red covers the area outside the batch's min_temp_c to
-max_temp_c range. The line shows actual readings. Breaches are visually obvious where the line exits
-the band. )
-B. Alert summary table listing active breaches with sensor ID, location, deviation in degrees Celsius,
-duration in minutes, and batch details.(Table visual. Columns: sensor ID, location, current temperature,
-allowed range, deviation in degrees, breach duration in minutes, batch ID, product name. Conditional
-formatting turns the deviation cell red if breach is active. Sort by breach duration descending so the
-longest-running breach is always at the top.)
-7.2 Distributor Stock and Replenishment Dashboard
-Audience: Supply chain planners, distributor managers.
-A. Stock coverage table ranked by days-of-cover ascending, filterable by product, region, and tier.
-Trend chart showing closing stock versus reorder point over the last 30 days for a selected product
-distributor pair.(Dual-line chart. X axis is snapshot date for the last 30 days. Two lines per selected
-product-distributor pair: one for closing_stock and one for reorder_point. The reorder_point line is a
-flat reference line. When the closing_stock line dips below the reorder_point line the risk is visually
-clear. )
-7.3 Sales Performance Dashboard
-Audience: Commercial team, regional sales managers.
-A. Revenue by category donut chart Donut chart. Each segment is one product category. Labels show
-category name and percentage of total. Centre label shows overall total revenue for the selected period.
-Simple, scannable, and appropriate for a five-category breakdown.
-Page 17
-Confidential
-Pharma Data Engineering Platform | Technical Design Document
-8. Technical Notes
-8.1 Athena Configuration
-• All fact tables are partitioned by partition_date. Athena queries must always include a
-partition_date predicate to avoid full-table scans.
-• GlueData Catalog is used as the Athena metadata store. All S3 tables are registered as Glue
-external tables.
-Document prepared by the Data Engineering team. Classificatio  , i want to create the dashboards i have my data in the s3 i have to create the tables and views in athena give me all the queries : dont halucinatnate ask me all those things that you dont know 
+
+import boto3
+import pandas as pd
+import json
+import time
+import random
+ 
+STREAM_NAME = "retail-stream-kritika"
+REGION = "ap-south-1"
+ 
+kinesis = boto3.client("kinesis", region_name=REGION)
+ 
+# Load datasets
+inventory_df = pd.read_csv("inventory_events.csv")
+sales_df = pd.read_csv("sales_transactions.csv")
+temperature_df = pd.read_csv("temperature_events.csv")
+ 
+# Add source type
+inventory_df["source_type"] = "inventory"
+sales_df["source_type"] = "sales"
+temperature_df["source_type"] = "temperature"
+ 
+# Combine all datasets
+combined_df = pd.concat([inventory_df, sales_df, temperature_df], ignore_index=True)
+ 
+# Shuffle data (important)
+combined_df = combined_df.sample(frac=1).reset_index(drop=True)
+ 
+print("🚀 Starting streaming...")
+ 
+for index, row in combined_df.iterrows():
+    
+    data = row.to_dict()
+    
+    # Convert to string for JSON
+    data = {k: str(v) for k, v in data.items()}
+    
+    print(f"Sending record {index} from {data['source_type']}")
+    
+    kinesis.put_record(
+        StreamName=STREAM_NAME,
+        Data=json.dumps(data),
+        PartitionKey=str(random.randint(1, 100))
+    )
+    
+    # 30 sec delay
+    time.sleep(30)
