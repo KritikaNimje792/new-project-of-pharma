@@ -1,47 +1,54 @@
+transaction_id,event_time,pharmacy_id,product_sku,batch_id,quantity_sold,unit_price,discount_pct,revenue,fulfillment_status
+T000,2026-03-27 17:32:56.976565,P04,SKU028,B046,6,134,19.965950084243,643.4737613226863,COMPLETED
+T001,2026-03-27 17:32:56.976589,P13,SKU022,B049,14,85,5.331248654908899,1219.558141006584,PENDING
+T002,2026-03-09 17:32:56.976599,P09,SKU018,B014,1,113,18.071660023529134,92.57902417341208,COMPLETED
+T003,2026-04-06 17:32:56.976606,P03,SKU020,B022,8,499,14.8855517373927,3397.7687746432835,COMPLETED
+T004,2026-03-16 17:32:56.976613,P14,SKU010,B021,10,345,26.55960760185412,2660.693537736033,PENDING
+T005,2026-03-28 17:32:56.976619,P04,SKU014,B050,1,155,6.290528532014977,145.2496807753768,PENDING
+T006,2026-04-03 17:32:56.976625,P14,SKU003,B026,1,44,11.578112938602297,38.90563030701499,COMPLETED
+T007,2026-03-12 17:32:56.976632,P09,SKU015,B041,-7,199,16.380719030353628,1164.816583907174,IN_TRANSIT
+T008,2026-04-07 17:32:56.976637,P04,SKU024,B001,4,103,13.538622574592244,356.22087499267997,COMPLETED
+T009,2026-03-27 17:32:56.976643,P02,SKU010,B046,13,73,2.2260120529997796,927.8751456170321,COMPLETED
+T010,2026-03-24 17:32:56.976649,P11,SKU002,B001,2,193,17.820916321562848,317.21126299876744,COMPLETED
 
-import boto3
-import pandas as pd
-import json
-import time
-import random
- 
-STREAM_NAME = "retail-stream-kritika"
-REGION = "ap-south-1"
- 
-kinesis = boto3.client("kinesis", region_name=REGION)
- 
-# Load datasets
-inventory_df = pd.read_csv("inventory_events.csv")
-sales_df = pd.read_csv("sales_transactions.csv")
-temperature_df = pd.read_csv("temperature_events.csv")
- 
-# Add source type
-inventory_df["source_type"] = "inventory"
-sales_df["source_type"] = "sales"
-temperature_df["source_type"] = "temperature"
- 
-# Combine all datasets
-combined_df = pd.concat([inventory_df, sales_df, temperature_df], ignore_index=True)
- 
-# Shuffle data (important)
-combined_df = combined_df.sample(frac=1).reset_index(drop=True)
- 
-print("🚀 Starting streaming...")
- 
-for index, row in combined_df.iterrows():
-    
-    data = row.to_dict()
-    
-    # Convert to string for JSON
-    data = {k: str(v) for k, v in data.items()}
-    
-    print(f"Sending record {index} from {data['source_type']}")
-    
-    kinesis.put_record(
-        StreamName=STREAM_NAME,
-        Data=json.dumps(data),
-        PartitionKey=str(random.randint(1, 100))
-    )
-    
-    # 30 sec delay
-    time.sleep(30)
+event_id,event_time,distributor_id,product_sku,batch_id,change_type,quantity_delta,current_stock
+IE000,2026-03-21 17:32:57.019559,D02,SKU021,B028,INVALID,95,358
+IE001,2026-04-03 17:32:57.019593,D08,SKU027,B002,RECEIPT,34,331
+IE002,2026-03-13 17:32:57.019600,D07,SKU024,B026,RECEIPT,19,372
+IE003,2026-04-02 17:32:57.019605,D09,SKU023,B053,RECEIPT,85,333
+IE004,2026-04-07 17:32:57.019610,D02,SKU014,B025,RECEIPT,83,467
+IE005,2026-03-22 17:32:57.019615,D03,SKU012,B043,DISPATCH,-61,379
+IE006,2026-04-08 17:32:57.019620,D04,SKU029,B051,INVALID,-34,439
+IE007,2026-03-09 17:32:57.019625,D00,SKU003,B058,DISPATCH,-87,342
+IE008,2026-03-29 17:32:57.019629,D04,SKU008,B051,DISPATCH,-79,80
+IE009,2026-03-18 17:32:57.019634,D03,SKU023,B043,DISPATCH,-84,179
+IE010,2026-03-29 17:32:57.019639,D08,SKU000,B043,RETURN,44,-12
+
+event_id,event_time,sensor_id,batch_id,temperature,unit,humidity
+E000,2026-03-21 17:32:56.986353,S0,B017,6.678037273858504,C,21.075656574851177
+E001,2026-03-22 17:32:56.986377,S1,B045,250.0,C,44.36666737737697
+E002,2026-03-10 17:32:56.986386,S2,B052,38.58628476592892,F,20.325601609628837
+E003,2026-03-29 17:32:56.986393,S3,B011,-120.0,C,76.20595698006503
+E004,2026-03-17 17:32:56.986398,S4,B016,7.256678277458402,C,46.395619656308014
+E005,2026-03-25 17:32:56.986404,S5,B030,6.619803156403001,C,82.75666759221147
+E006,2026-03-14 17:32:56.986409,S6,B055,-120.0,C,67.383908324557
+E007,2026-03-22 17:32:56.986471,S7,,6.800968363094212,C,78.25239314462601
+E008,2026-03-29 17:32:56.986476,S8,,3.7237374973152324,C,85.19773678849639
+E009,2026-04-03 17:32:56.986481,S9,B030,3.8832366773577593,C,67.81751159666379
+
+you have to create a consumer.py script which will retrieve the data from the kinesis and then clean and validate the data and store the valid data in the hive table. also give me the create hive table commands , Three event types are produced by operational systems and streamed through Kinesis:
+• Temperature sensor events are emitted every 30 seconds per device. Spark Structured
+Streaming consumes these events, normalises temperature units to Celsius, computes a 5
+minute rolling window average, flags anomalies beyond 3 standard deviations, and marks
+breaches against the batch cold chain specification before writing enriched Parquet to S3.
+Page 4
+Confidential
+Pharma Data Engineering Platform | Technical Design Document
+• Pharmacy sales transactions are produced on every point-of-sale event. Spark deduplicates on
+transaction ID using a 10-minute watermark, enriches each record with product category and
+controlled-substance flag via a broadcast join against the product dimension, and writes to the
+sales fact table on S3.
+• Distributor inventory change events are produced on every stock movement. Spark computes
+days-of-stock coverage, flags records where current stock falls below the reorder point, and
+routes those flagged records to an SNS alert topic in addition to writing to S3. the below is the table schema that is provided to me ,  
+the below are all the cleaning and validation rules that you have to implement , i have a jar file to connect to kinesis : spark-sql-kinesis_2.12-1.2.0_spark-3.0.jar , my kinesis name is: pharma_kinesis_kritika
